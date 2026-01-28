@@ -5,14 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sing Rhymes - PlayLearn</title>
-
     <link rel="stylesheet" href="css/global.css">
-
+    <link rel="stylesheet" href="css/animations.css">
     <style>
         body {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            background: linear-gradient(135deg, #FFE5E5 0%, #FFD1DC 50%, #FFC0CB 100%);
             min-height: 100vh;
-            padding: var(--spacing-md);
+            padding: 20px;
+            overflow-x: hidden;
         }
 
         .game-container {
@@ -20,163 +20,616 @@
             margin: 0 auto;
         }
 
-        .header {
-            background: var(--white);
-            border-radius: var(--radius-xl);
-            padding: var(--spacing-xl);
-            margin-bottom: var(--spacing-lg);
+        .game-header {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
             text-align: center;
-            box-shadow: var(--shadow-lg);
+        }
+
+        .game-title {
+            font-size: 32px;
+            color: #FF69B4;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .mascot {
+            font-size: 60px;
+            animation: bounce 2s infinite;
         }
 
         .rhyme-card {
-            background: var(--white);
-            border-radius: var(--radius-xl);
-            padding: var(--spacing-2xl);
-            margin-bottom: var(--spacing-lg);
-            box-shadow: var(--shadow-lg);
+            background: white;
+            border-radius: 25px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
             text-align: center;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
-        .rhyme-title {
-            font-size: var(--font-size-3xl);
-            color: var(--secondary-coral);
-            margin-bottom: var(--spacing-xl);
+        .rhyme-image {
+            font-size: 120px;
+            margin-bottom: 30px;
+            animation: float 3s ease-in-out infinite;
         }
 
         .rhyme-text {
-            font-size: var(--font-size-2xl);
+            font-size: 28px;
             line-height: 1.8;
-            color: var(--neutral-dark);
-            margin-bottom: var(--spacing-xl);
-            font-family: 'Quicksand', sans-serif;
+            color: #333;
+            margin-bottom: 30px;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
         }
 
-        .play-btn {
-            font-size: var(--font-size-2xl);
-            padding: var(--spacing-xl) var(--spacing-2xl);
-            margin: var(--spacing-md);
+        .rhyme-text.paused {
+            color: #999;
         }
 
-        .rhyme-icon {
-            font-size: 6rem;
-            margin-bottom: var(--spacing-md);
-            animation: bounce 2s ease-in-out infinite;
+        .rhyme-text .highlight {
+            color: #FF69B4;
+            font-weight: bold;
+            font-size: 32px;
         }
 
-        .navigation {
+        .listening-indicator {
+            display: none;
+            margin: 30px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #FFE5E5, #FFD1DC);
+            border-radius: 15px;
+            animation: pulse 1.5s infinite;
+        }
+
+        .listening-indicator.active {
+            display: block;
+        }
+
+        .mic-icon {
+            font-size: 48px;
+            animation: pulse 1s infinite;
+        }
+
+        .listening-text {
+            font-size: 20px;
+            color: #FF69B4;
+            margin-top: 10px;
+        }
+
+        .controls {
             display: flex;
-            gap: var(--spacing-md);
+            gap: 15px;
             justify-content: center;
-            margin-top: var(--spacing-xl);
+            flex-wrap: wrap;
         }
 
-        .nav-btn {
-            font-size: var(--font-size-xl);
-            padding: var(--spacing-lg) var(--spacing-xl);
+        .btn {
+            padding: 20px 40px;
+            border: none;
+            border-radius: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-play {
+            background: linear-gradient(135deg, #FF69B4, #FF1493);
+            color: white;
+        }
+
+        .btn-listen {
+            background: linear-gradient(135deg, #9370DB, #8A2BE2);
+            color: white;
+        }
+
+        .btn-next {
+            background: linear-gradient(135deg, #32CD32, #228B22);
+            color: white;
+            display: none;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .feedback {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 24px;
+            animation: scaleIn 0.5s;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.success {
+            background: #e6ffe6;
+            color: #228B22;
+        }
+
+        .feedback.participated {
+            background: #fff4e6;
+            color: #FF8C00;
+        }
+
+        .stars {
+            font-size: 40px;
+            margin: 10px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #FF69B4, #FF1493);
+            transition: width 0.5s;
+        }
+
+        .permission-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .permission-modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 30px;
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            animation: scaleIn 0.5s;
+        }
+
+        .modal-content h2 {
+            color: #FF69B4;
+            margin-bottom: 20px;
+        }
+
+        .modal-content p {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+            z-index: 100;
+        }
+
+        .back-button:hover {
+            transform: scale(1.1);
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.6;
+            }
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
         }
     </style>
 </head>
 
 <body>
+    <button class="back-button" onclick="window.location.href='game-hub-3-5.html'">
+        ← Back
+    </button>
+
     <div class="game-container">
-        <div class="header">
-            <h1 style="color: var(--secondary-coral); margin: 0;">🎵 Sing Rhymes!</h1>
+        <div class="game-header">
+            <div class="game-title">
+                <span class="mascot">🎵</span>
+                <span>Sing Rhymes</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
         </div>
 
         <div class="rhyme-card">
-            <div class="rhyme-icon" id="rhyme-icon">⭐</div>
-            <h2 class="rhyme-title" id="rhyme-title">Twinkle Twinkle Little Star</h2>
-            <div class="rhyme-text" id="rhyme-text">
-                Twinkle, twinkle, little star,<br>
-                How I wonder what you are!<br>
-                Up above the world so high,<br>
-                Like a diamond in the sky.
+            <div class="rhyme-image" id="rhymeImage">🌟</div>
+            <div class="rhyme-text" id="rhymeText">
+                Loading rhyme...
             </div>
 
-            <button class="btn btn-primary play-btn" onclick="playRhyme()">
-                🔊 Listen
-            </button>
+            <div class="listening-indicator" id="listeningIndicator">
+                <div class="mic-icon">🎤</div>
+                <div class="listening-text">Listening... Sing along!</div>
+            </div>
 
-            <div class="navigation">
-                <button class="btn btn-success nav-btn" onclick="previousRhyme()">
-                    ← Previous
+            <div class="feedback" id="feedback">
+                <div class="stars" id="feedbackStars"></div>
+                <div id="feedbackText"></div>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-play" id="playBtn" onclick="playRhyme()">
+                    🎵 Play Rhyme
                 </button>
-                <button class="btn btn-success nav-btn" onclick="nextRhyme()">
-                    Next →
+                <button class="btn btn-listen" id="listenBtn" onclick="listenForChild()" disabled>
+                    🎤 Your Turn!
+                </button>
+                <button class="btn btn-next" id="nextBtn" onclick="nextRhyme()">
+                    ➡️ Next Rhyme
                 </button>
             </div>
         </div>
-
-        <button class="btn btn-primary" onclick="window.location.href='game-hub-3-5.html'" style="width: 100%;">
-            ← Back to Games
-        </button>
     </div>
 
-    <script src="js/audio-manager.js"></script>
-    <script>
-        const audioManager = new AudioManager();
+    <div class="permission-modal" id="permissionModal">
+        <div class="modal-content">
+            <h2>🎤 Microphone Permission</h2>
+            <p>To hear you sing along, we need permission to use your microphone. Your voice is never recorded or saved!
+            </p>
+            <button class="btn btn-play" onclick="requestMicPermission()">
+                ✓ Allow Microphone
+            </button>
+        </div>
+    </div>
 
+    <script src="js/nlp-engine.js"></script>
+    <script src="js/adaptive-learning-engine.js"></script>
+    <script>
         const rhymes = [
             {
-                title: "Twinkle Twinkle Little Star",
-                icon: "⭐",
-                text: "Twinkle, twinkle, little star,<br>How I wonder what you are!<br>Up above the world so high,<br>Like a diamond in the sky."
+                image: '🌟',
+                text: 'Twinkle, twinkle, little star,\nHow I wonder what you are!',
+                expectedWords: ['twinkle', 'star', 'wonder'],
+                pauseAt: 'How I wonder what you are!'
             },
             {
-                title: "Baa Baa Black Sheep",
-                icon: "🐑",
-                text: "Baa, baa, black sheep,<br>Have you any wool?<br>Yes sir, yes sir,<br>Three bags full!"
+                image: '🐑',
+                text: 'Mary had a little lamb,\nLittle lamb, little lamb!',
+                expectedWords: ['mary', 'lamb', 'little'],
+                pauseAt: 'Little lamb, little lamb!'
             },
             {
-                title: "Humpty Dumpty",
-                icon: "🥚",
-                text: "Humpty Dumpty sat on a wall,<br>Humpty Dumpty had a great fall.<br>All the king's horses and all the king's men,<br>Couldn't put Humpty together again."
+                image: '🕷️',
+                text: 'Itsy bitsy spider\nClimbed up the water spout!',
+                expectedWords: ['spider', 'climbed', 'spout'],
+                pauseAt: 'Climbed up the water spout!'
             },
             {
-                title: "Jack and Jill",
-                icon: "🏔️",
-                text: "Jack and Jill went up the hill,<br>To fetch a pail of water.<br>Jack fell down and broke his crown,<br>And Jill came tumbling after."
+                image: '🚌',
+                text: 'The wheels on the bus go round and round,\nRound and round, round and round!',
+                expectedWords: ['wheels', 'bus', 'round'],
+                pauseAt: 'Round and round, round and round!'
             },
             {
-                title: "Mary Had a Little Lamb",
-                icon: "🐑",
-                text: "Mary had a little lamb,<br>Little lamb, little lamb,<br>Mary had a little lamb,<br>Its fleece was white as snow."
-            },
-            {
-                title: "Row Row Row Your Boat",
-                icon: "🚣",
-                text: "Row, row, row your boat,<br>Gently down the stream.<br>Merrily, merrily, merrily, merrily,<br>Life is but a dream."
+                image: '☀️',
+                text: 'You are my sunshine,\nMy only sunshine!',
+                expectedWords: ['sunshine', 'only'],
+                pauseAt: 'My only sunshine!'
             }
         ];
 
-        let currentRhyme = 0;
+        let currentRhymeIndex = 0;
+        let nlpEngine = null;
+        let adaptiveEngine = null;
+        let hasPermission = false;
 
-        function displayRhyme() {
-            const rhyme = rhymes[currentRhyme];
-            document.getElementById('rhyme-icon').textContent = rhyme.icon;
-            document.getElementById('rhyme-title').textContent = rhyme.title;
-            document.getElementById('rhyme-text').innerHTML = rhyme.text;
+        // Initialize engines
+        function initializeEngines() {
+            nlpEngine = new NLPEngine();
+            adaptiveEngine = new AdaptiveLearningEngine();
+            adaptiveEngine.initialize('3-5');
+
+            // Check if speech recognition is supported
+            if (!NLPEngine.isSupported()) {
+                console.log('Speech recognition not supported - using fallback mode');
+                document.getElementById('listenBtn').textContent = '✓ Continue';
+            }
         }
 
-        function playRhyme() {
-            audioManager.playSound('success');
-            alert('🎵 Imagine the rhyme playing here!\n\n(In production, this would play actual audio)');
+        // Request microphone permission
+        async function requestMicPermission() {
+            if (nlpEngine) {
+                hasPermission = await nlpEngine.requestPermission();
+                document.getElementById('permissionModal').classList.remove('active');
+
+                if (hasPermission) {
+                    console.log('✅ Microphone permission granted');
+                } else {
+                    console.log('❌ Microphone permission denied - using fallback');
+                }
+            }
         }
 
+        // Load current rhyme
+        function loadRhyme() {
+            const rhyme = rhymes[currentRhymeIndex];
+            document.getElementById('rhymeImage').textContent = rhyme.image;
+            document.getElementById('rhymeText').innerHTML = rhyme.text.replace(/\n/g, '<br>');
+            document.getElementById('feedback').classList.remove('show');
+
+            document.getElementById('playBtn').disabled = false;
+            document.getElementById('listenBtn').disabled = true;
+            document.getElementById('nextBtn').style.display = 'none';
+
+            updateProgress();
+        }
+
+        // Play rhyme with pause
+        async function playRhyme() {
+            const rhyme = rhymes[currentRhymeIndex];
+            const rhymeText = document.getElementById('rhymeText');
+            const playBtn = document.getElementById('playBtn');
+            const listenBtn = document.getElementById('listenBtn');
+
+            playBtn.disabled = true;
+
+            // Play full rhyme first
+            await speakText(rhyme.text);
+
+            // Wait a moment
+            await sleep(1000);
+
+            // Play first part
+            const parts = rhyme.text.split('\n');
+            rhymeText.innerHTML = parts[0] + '<br><span class="paused">' + parts[1] + '</span>';
+            await speakText(parts[0]);
+
+            // Pause and wait for child
+            await sleep(500);
+            rhymeText.innerHTML = parts[0] + '<br><span class="highlight">' + parts[1] + '</span>';
+
+            // Enable listen button
+            listenBtn.disabled = false;
+            listenBtn.focus();
+
+            // Record interaction
+            const startTime = Date.now();
+            adaptiveEngine.recordInteraction({
+                type: 'rhyme-listening',
+                correct: true,
+                timeSpent: Date.now() - startTime,
+                context: { rhyme: currentRhymeIndex }
+            });
+        }
+
+        // Listen for child participation
+        async function listenForChild() {
+            const rhyme = rhymes[currentRhymeIndex];
+            const listenBtn = document.getElementById('listenBtn');
+            const listeningIndicator = document.getElementById('listeningIndicator');
+            const feedback = document.getElementById('feedback');
+
+            listenBtn.disabled = true;
+            listeningIndicator.classList.add('active');
+
+            const startTime = Date.now();
+
+            // Use NLP engine to listen
+            if (nlpEngine && NLPEngine.isSupported() && hasPermission) {
+                nlpEngine.listenForRhyme(rhyme, (result) => {
+                    listeningIndicator.classList.remove('active');
+                    showFeedback(result);
+
+                    // Record interaction
+                    adaptiveEngine.recordInteraction({
+                        type: 'rhyme-participation',
+                        correct: result.participated,
+                        timeSpent: Date.now() - startTime,
+                        context: {
+                            rhyme: currentRhymeIndex,
+                            quality: result.quality,
+                            method: result.method
+                        }
+                    });
+
+                    document.getElementById('nextBtn').style.display = 'block';
+                });
+            } else {
+                // Fallback: Auto-complete after 3 seconds
+                await sleep(3000);
+                listeningIndicator.classList.remove('active');
+                showFeedback({ participated: true, method: 'fallback', quality: 'participated' });
+
+                adaptiveEngine.recordInteraction({
+                    type: 'rhyme-participation',
+                    correct: true,
+                    timeSpent: Date.now() - startTime,
+                    context: { rhyme: currentRhymeIndex, method: 'fallback' }
+                });
+
+                document.getElementById('nextBtn').style.display = 'block';
+            }
+        }
+
+        // Show feedback
+        function showFeedback(result) {
+            const feedback = document.getElementById('feedback');
+            const feedbackStars = document.getElementById('feedbackStars');
+            const feedbackText = document.getElementById('feedbackText');
+
+            let stars = '⭐';
+            let message = 'Great job listening! 🎵';
+            let className = 'participated';
+
+            if (result.quality === 'excellent') {
+                stars = '⭐⭐⭐';
+                message = 'Amazing! You know this rhyme! 🌟';
+                className = 'success';
+            } else if (result.quality === 'good') {
+                stars = '⭐⭐';
+                message = 'Wonderful! Keep singing! 🎶';
+                className = 'success';
+            }
+
+            feedbackStars.textContent = stars;
+            feedbackText.textContent = message;
+            feedback.className = 'feedback show ' + className;
+
+            // Play success sound
+            playSound('success');
+        }
+
+        // Next rhyme
         function nextRhyme() {
-            currentRhyme = (currentRhyme + 1) % rhymes.length;
-            displayRhyme();
-            audioManager.playSound('click');
+            currentRhymeIndex++;
+            if (currentRhymeIndex >= rhymes.length) {
+                showCompletionModal();
+            } else {
+                loadRhyme();
+            }
         }
 
-        function previousRhyme() {
-            currentRhyme = (currentRhyme - 1 + rhymes.length) % rhymes.length;
-            displayRhyme();
-            audioManager.playSound('click');
+        // Update progress
+        function updateProgress() {
+            const progress = ((currentRhymeIndex + 1) / rhymes.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
         }
 
-        displayRhyme();
+        // Show completion modal
+        function showCompletionModal() {
+            const analytics = adaptiveEngine.getSessionAnalytics();
+            alert(`🎉 Amazing! You completed all rhymes!\n\nYou sang ${rhymes.length} rhymes!\nSuccess rate: ${(analytics.successRate * 100).toFixed(0)}%\n\nKeep singing! 🎵`);
+            window.location.href = 'game-hub-3-5.html';
+        }
+
+        // Text-to-speech
+        function speakText(text) {
+            return new Promise((resolve) => {
+                if ('speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.rate = 0.8;
+                    utterance.pitch = 1.2;
+                    utterance.onend = resolve;
+                    speechSynthesis.speak(utterance);
+                } else {
+                    resolve();
+                }
+            });
+        }
+
+        // Play sound
+        function playSound(type) {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            if (type === 'success') {
+                oscillator.frequency.value = 800;
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.3);
+            }
+        }
+
+        // Sleep helper
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', () => {
+            initializeEngines();
+            loadRhyme();
+
+            // Show permission modal if needed
+            if (NLPEngine.isSupported()) {
+                setTimeout(() => {
+                    document.getElementById('permissionModal').classList.add('active');
+                }, 1000);
+            }
+        });
     </script>
 </body>
 
