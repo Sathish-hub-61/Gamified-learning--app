@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Number Match - PlayLearn</title>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #FFF4E6 0%, #FFE8CC 50%, #FFD8A8 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .game-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .game-header {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .game-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .game-title h1 {
+            font-size: 28px;
+            color: #FF6B35;
+            margin: 0;
+        }
+
+        .mascot {
+            font-size: 60px;
+            animation: bounce 2s infinite;
+        }
+
+        .score-display {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .score-item {
+            text-align: center;
+        }
+
+        .score-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #FF6B35;
+        }
+
+        .score-label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .instruction-box {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .instruction-box p {
+            font-size: 20px;
+            color: #333;
+            margin: 0;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .draggable-section {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #FF6B35;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .number-items {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .number-item {
+            width: 100%;
+            height: 100px;
+            border-radius: 20px;
+            cursor: grab;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .number-item:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .number-item.dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+        }
+
+        .number-item.matched {
+            opacity: 0.3;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .drop-zones {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .drop-zone {
+            border: 4px dashed #ddd;
+            border-radius: 20px;
+            padding: 20px;
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            background: #fafafa;
+            position: relative;
+        }
+
+        .drop-zone.drag-over {
+            border-color: #FF6B35;
+            background: #FFF4E6;
+            transform: scale(1.05);
+        }
+
+        .drop-zone.correct {
+            border-color: var(--success-green);
+            background: #e6ffe6;
+            animation: successPulse 0.5s;
+        }
+
+        .drop-zone.incorrect {
+            border-color: #ff4444;
+            background: #ffe6e6;
+            animation: shake 0.5s;
+        }
+
+        .shadow-number {
+            font-size: 80px;
+            color: #ddd;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .objects-display {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 10px;
+            font-size: 32px;
+        }
+
+        .dropped-number {
+            font-size: 80px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+            position: absolute;
+            animation: dropIn 0.3s;
+        }
+
+        .completion-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .completion-modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 30px;
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            animation: scaleIn 0.5s;
+        }
+
+        .modal-content h2 {
+            font-size: 36px;
+            color: #FF6B35;
+            margin-bottom: 20px;
+        }
+
+        .stars {
+            font-size: 60px;
+            margin: 20px 0;
+        }
+
+        .modal-stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px 0;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #FF6B35;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #FF6B35;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--success-green);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+            z-index: 100;
+        }
+
+        .back-button:hover {
+            transform: scale(1.1);
+        }
+
+        @keyframes successPulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-10px);
+            }
+
+            75% {
+                transform: translateX(10px);
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes dropIn {
+            from {
+                transform: scale(0) rotate(-180deg);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <button class="back-button" onclick="window.location.href='hub-3-5.html'">
+        ← Back
+    </button>
+
+    <div class="game-container">
+        <div class="game-header">
+            <div class="game-title">
+                <span class="mascot">🐝</span>
+                <h1>Number Match Game</h1>
+            </div>
+            <div class="score-display">
+                <div class="score-item">
+                    <div class="score-value" id="scoreValue">0</div>
+                    <div class="score-label">Score</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-value" id="matchedValue">0/5</div>
+                    <div class="score-label">Matched</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="instruction-box">
+            <p>🔢 Drag the numbers to their matching shadows! Count the objects! 🎯</p>
+        </div>
+
+        <div class="game-board">
+            <div class="draggable-section">
+                <div class="section-title">🔢 Numbers</div>
+                <div class="number-items" id="numberItems">
+                    <div class="number-item" draggable="true" data-number="1"
+                        style="background: linear-gradient(135deg, #ff6b6b, #ee5a6f);">
+                        1
+                    </div>
+                    <div class="number-item" draggable="true" data-number="2"
+                        style="background: linear-gradient(135deg, #51cf66, #37b24d);">
+                        2
+                    </div>
+                    <div class="number-item" draggable="true" data-number="3"
+                        style="background: linear-gradient(135deg, #4dabf7, #339af0);">
+                        3
+                    </div>
+                    <div class="number-item" draggable="true" data-number="4"
+                        style="background: linear-gradient(135deg, #ffd43b, #fab005);">
+                        4
+                    </div>
+                    <div class="number-item" draggable="true" data-number="5"
+                        style="background: linear-gradient(135deg, #b197fc, #9775fa);">
+                        5
+                    </div>
+                </div>
+            </div>
+
+            <div class="draggable-section">
+                <div class="section-title">🎯 Match Here</div>
+                <div class="drop-zones" id="dropZones">
+                    <div class="drop-zone" data-number="1">
+                        <div class="shadow-number">1</div>
+                        <div class="objects-display">🌟</div>
+                    </div>
+                    <div class="drop-zone" data-number="2">
+                        <div class="shadow-number">2</div>
+                        <div class="objects-display">🍎🍎</div>
+                    </div>
+                    <div class="drop-zone" data-number="3">
+                        <div class="shadow-number">3</div>
+                        <div class="objects-display">🦋🦋🦋</div>
+                    </div>
+                    <div class="drop-zone" data-number="4">
+                        <div class="shadow-number">4</div>
+                        <div class="objects-display">🌸🌸🌸🌸</div>
+                    </div>
+                    <div class="drop-zone" data-number="5">
+                        <div class="shadow-number">5</div>
+                        <div class="objects-display">⭐⭐⭐⭐⭐</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="completion-modal" id="completionModal">
+        <div class="modal-content">
+            <h2>🎉 Fantastic Counting! 🎉</h2>
+            <div class="stars">⭐⭐⭐</div>
+            <p style="font-size: 20px; color: #666;">You matched all the numbers!</p>
+            <div class="modal-stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="finalScore">0</div>
+                    <div class="stat-label">Total Score</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="finalAttempts">0</div>
+                    <div class="stat-label">Attempts</div>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-primary" onclick="resetGame()">🔄 Play Again</button>
+                <button class="btn btn-secondary" onclick="window.location.href='hub-3-5.html'">🏠 Back to Hub</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let score = 0;
+        let matched = 0;
+        let totalAttempts = 0;
+        let draggedElement = null;
+
+        const numberItems = document.querySelectorAll('.number-item');
+        const dropZones = document.querySelectorAll('.drop-zone');
+
+        // Drag events for number items
+        numberItems.forEach(item => {
+            item.addEventListener('dragstart', handleDragStart);
+            item.addEventListener('dragend', handleDragEnd);
+        });
+
+        // Drop events for drop zones
+        dropZones.forEach(zone => {
+            zone.addEventListener('dragover', handleDragOver);
+            zone.addEventListener('dragleave', handleDragLeave);
+            zone.addEventListener('drop', handleDrop);
+        });
+
+        function handleDragStart(e) {
+            if (this.classList.contains('matched')) return;
+            draggedElement = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', this.innerHTML);
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+        }
+
+        function handleDragOver(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            if (!this.classList.contains('correct')) {
+                this.classList.add('drag-over');
+            }
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+
+        function handleDragLeave(e) {
+            this.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            if (e.stopPropagation) {
+                e.stopPropagation();
+            }
+
+            this.classList.remove('drag-over');
+
+            if (!draggedElement || this.classList.contains('correct')) {
+                return false;
+            }
+
+            totalAttempts++;
+            const draggedNumber = draggedElement.getAttribute('data-number');
+            const targetNumber = this.getAttribute('data-number');
+
+            if (draggedNumber === targetNumber) {
+                // Correct match
+                playSound('success');
+                this.classList.add('correct');
+                draggedElement.classList.add('matched');
+
+                // Hide shadow number
+                const shadowNumber = this.querySelector('.shadow-number');
+                shadowNumber.style.display = 'none';
+
+                // Create dropped number visual
+                const droppedNumber = document.createElement('div');
+                droppedNumber.className = 'dropped-number';
+                droppedNumber.textContent = draggedNumber;
+                droppedNumber.style.background = draggedElement.style.background;
+                droppedNumber.style.webkitBackgroundClip = 'text';
+                droppedNumber.style.webkitTextFillColor = 'transparent';
+                droppedNumber.style.backgroundClip = 'text';
+                this.appendChild(droppedNumber);
+
+                score += 10;
+                matched++;
+                updateScore();
+
+                // Check if game is complete
+                if (matched === 5) {
+                    setTimeout(showCompletionModal, 500);
+                }
+            } else {
+                // Incorrect match
+                playSound('error');
+                this.classList.add('incorrect');
+                setTimeout(() => {
+                    this.classList.remove('incorrect');
+                }, 500);
+            }
+
+            return false;
+        }
+
+        function updateScore() {
+            document.getElementById('scoreValue').textContent = score;
+            document.getElementById('matchedValue').textContent = `${matched}/5`;
+        }
+
+        function showCompletionModal() {
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('finalAttempts').textContent = totalAttempts;
+            document.getElementById('completionModal').classList.add('active');
+            playSound('complete');
+
+            // Save progress
+            saveProgress();
+        }
+
+        function resetGame() {
+            score = 0;
+            matched = 0;
+            totalAttempts = 0;
+            updateScore();
+
+            // Reset all items
+            numberItems.forEach(item => {
+                item.classList.remove('matched');
+            });
+
+            dropZones.forEach(zone => {
+                zone.classList.remove('correct', 'incorrect');
+                const shadowNumber = zone.querySelector('.shadow-number');
+                if (shadowNumber) shadowNumber.style.display = 'block';
+                const droppedNumber = zone.querySelector('.dropped-number');
+                if (droppedNumber) {
+                    droppedNumber.remove();
+                }
+            });
+
+            document.getElementById('completionModal').classList.remove('active');
+        }
+
+        function playSound(type) {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            if (type === 'success') {
+                oscillator.frequency.value = 800;
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.3);
+            } else if (type === 'error') {
+                oscillator.frequency.value = 200;
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.2);
+            } else if (type === 'complete') {
+                [523, 659, 784].forEach((freq, i) => {
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+                    osc.frequency.value = freq;
+                    gain.gain.setValueAtTime(0.3, audioContext.currentTime + i * 0.15);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + i * 0.15 + 0.3);
+                    osc.start(audioContext.currentTime + i * 0.15);
+                    osc.stop(audioContext.currentTime + i * 0.15 + 0.3);
+                });
+            }
+        }
+
+        function saveProgress() {
+            const progress = {
+                game: 'number-match',
+                score: score,
+                attempts: totalAttempts,
+                completed: true,
+                timestamp: new Date().toISOString()
+            };
+
+            let allProgress = JSON.parse(localStorage.getItem('gameProgress') || '[]');
+            allProgress.push(progress);
+            localStorage.setItem('gameProgress', JSON.stringify(allProgress));
+
+            let stats = JSON.parse(localStorage.getItem('userStats') || '{"stars": 0, "badges": 0}');
+            stats.stars += 3;
+            localStorage.setItem('userStats', JSON.stringify(stats));
+        }
+    </script>
+</body>
+
+</html>

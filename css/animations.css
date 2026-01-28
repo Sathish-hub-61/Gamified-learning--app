@@ -1,0 +1,383 @@
+/* ========================================
+   ADDITIONAL ANIMATIONS & EFFECTS
+   ======================================== */
+
+/* Level Up Notification */
+.level-notification {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.8);
+    background: var(--gradient-primary);
+    color: var(--white);
+    padding: var(--spacing-xl);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    z-index: 10000;
+    text-align: center;
+    min-width: 300px;
+    opacity: 0;
+    pointer-events: none;
+    transition: all var(--transition-base);
+}
+
+.level-notification.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.level-notification h3 {
+    margin: 0 0 var(--spacing-sm) 0;
+    font-size: var(--font-size-2xl);
+}
+
+.level-notification p {
+    margin: 0;
+    font-size: var(--font-size-lg);
+}
+
+/* Floating Stars Animation */
+.floating-stars {
+    position: fixed;
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: var(--font-size-3xl);
+    font-weight: 700;
+    color: var(--secondary-gold);
+    z-index: 9999;
+    animation: floatUp 2s ease-out forwards;
+    pointer-events: none;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes floatUp {
+    0% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-100px);
+    }
+}
+
+/* Badge Unlock Modal */
+.badge-unlock-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    opacity: 0;
+    transition: opacity var(--transition-base);
+}
+
+.badge-unlock-modal.show {
+    opacity: 1;
+}
+
+.badge-unlock-content {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-2xl);
+    text-align: center;
+    max-width: 400px;
+    transform: scale(0.8);
+    transition: transform var(--transition-base);
+    animation: badgeAppear 0.6s ease forwards;
+}
+
+@keyframes badgeAppear {
+    0% {
+        transform: scale(0.5) rotate(-10deg);
+        opacity: 0;
+    }
+
+    50% {
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+.badge-icon-large {
+    font-size: 6rem;
+    margin-bottom: var(--spacing-md);
+    animation: rotateBadge 1s ease infinite;
+}
+
+@keyframes rotateBadge {
+
+    0%,
+    100% {
+        transform: rotate(0deg) scale(1);
+    }
+
+    25% {
+        transform: rotate(-5deg) scale(1.05);
+    }
+
+    75% {
+        transform: rotate(5deg) scale(1.05);
+    }
+}
+
+.badge-unlock-content h2 {
+    color: var(--primary-purple);
+    margin-bottom: var(--spacing-sm);
+}
+
+.badge-unlock-content h3 {
+    color: var(--neutral-dark);
+    margin-bottom: var(--spacing-lg);
+}
+
+/* Confetti Effect */
+.confetti {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    background: var(--secondary-gold);
+    position: absolute;
+    animation: confettiFall 3s linear forwards;
+    z-index: 9998;
+}
+
+@keyframes confettiFall {
+    0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+    }
+}
+
+/* Particle Effects */
+.particle {
+    position: fixed;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9997;
+    animation: particleFloat 2s ease-out forwards;
+}
+
+@keyframes particleFloat {
+    0% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(var(--tx), var(--ty)) scale(0);
+    }
+}
+
+/* Glow Effect for Interactive Elements */
+.glow {
+    box-shadow: 0 0 20px rgba(103, 126, 234, 0.6),
+        0 0 40px rgba(103, 126, 234, 0.4),
+        0 0 60px rgba(103, 126, 234, 0.2);
+    animation: glowPulse 2s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 20px rgba(103, 126, 234, 0.6),
+            0 0 40px rgba(103, 126, 234, 0.4),
+            0 0 60px rgba(103, 126, 234, 0.2);
+    }
+
+    50% {
+        box-shadow: 0 0 30px rgba(103, 126, 234, 0.8),
+            0 0 60px rgba(103, 126, 234, 0.6),
+            0 0 90px rgba(103, 126, 234, 0.4);
+    }
+}
+
+/* Loading Spinner */
+.loading-spinner {
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    border: 5px solid var(--neutral-light);
+    border-top-color: var(--primary-purple);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Tooltip */
+.tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip .tooltip-text {
+    visibility: hidden;
+    background-color: var(--neutral-dark);
+    color: var(--white);
+    text-align: center;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity var(--transition-base);
+    font-size: var(--font-size-sm);
+    white-space: nowrap;
+}
+
+.tooltip .tooltip-text::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: var(--neutral-dark) transparent transparent transparent;
+}
+
+.tooltip:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Ripple Effect */
+.ripple {
+    position: relative;
+    overflow: hidden;
+}
+
+.ripple::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.ripple:active::after {
+    width: 200px;
+    height: 200px;
+}
+
+/* Skeleton Loading */
+.skeleton {
+    background: linear-gradient(90deg,
+            var(--neutral-bg) 25%,
+            var(--neutral-light) 50%,
+            var(--neutral-bg) 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Success Checkmark Animation */
+.checkmark {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: block;
+    stroke-width: 3;
+    stroke: var(--success);
+    stroke-miterlimit: 10;
+    margin: var(--spacing-lg) auto;
+    box-shadow: inset 0 0 0 var(--success);
+    animation: fillCheckmark 0.4s ease-in-out 0.4s forwards,
+        scaleCheckmark 0.3s ease-in-out 0.9s both;
+}
+
+.checkmark-circle {
+    stroke-dasharray: 166;
+    stroke-dashoffset: 166;
+    stroke-width: 3;
+    stroke-miterlimit: 10;
+    stroke: var(--success);
+    fill: none;
+    animation: strokeCheckmark 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+.checkmark-check {
+    transform-origin: 50% 50%;
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    animation: strokeCheckmark 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+}
+
+@keyframes strokeCheckmark {
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes scaleCheckmark {
+
+    0%,
+    100% {
+        transform: none;
+    }
+
+    50% {
+        transform: scale3d(1.1, 1.1, 1);
+    }
+}
+
+@keyframes fillCheckmark {
+    100% {
+        box-shadow: inset 0 0 0 40px var(--success);
+    }
+}
+
+/* Responsive Animations - Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

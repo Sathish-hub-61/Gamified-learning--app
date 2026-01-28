@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Operations - PlayLearn</title>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .game-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .game-header {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .game-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .game-title h1 {
+            font-size: 28px;
+            color: #667eea;
+            margin: 0;
+        }
+
+        .mascot {
+            font-size: 60px;
+            animation: bounce 2s infinite;
+        }
+
+        .score-display {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .score-item {
+            text-align: center;
+        }
+
+        .score-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .score-label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .instruction-box {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .instruction-box p {
+            font-size: 20px;
+            color: #333;
+            margin: 0;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .draggable-section {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .number-items {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .number-item {
+            width: 100%;
+            height: 80px;
+            border-radius: 15px;
+            cursor: grab;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .number-item:hover {
+            transform: scale(1.1) rotate(-3deg);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .number-item.dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+        }
+
+        .number-item.used {
+            opacity: 0.3;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .problems-section {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .math-problem {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+            min-height: 100px;
+        }
+
+        .problem-number {
+            color: #667eea;
+        }
+
+        .operator {
+            color: #764ba2;
+            font-size: 36px;
+        }
+
+        .equals {
+            color: #999;
+        }
+
+        .answer-slot {
+            min-width: 80px;
+            height: 80px;
+            border: 3px dashed #ccc;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            background: #f9f9f9;
+        }
+
+        .answer-slot.drag-over {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: scale(1.1);
+        }
+
+        .answer-slot.correct {
+            border-color: var(--success-green);
+            background: #e6ffe6;
+            animation: successPulse 0.5s;
+        }
+
+        .answer-slot.incorrect {
+            border-color: #ff4444;
+            background: #ffe6e6;
+            animation: shake 0.5s;
+        }
+
+        .dropped-answer {
+            font-size: 36px;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 10px 20px;
+            border-radius: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            animation: dropIn 0.3s;
+        }
+
+        .completion-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .completion-modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 30px;
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            animation: scaleIn 0.5s;
+        }
+
+        .modal-content h2 {
+            font-size: 36px;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .stars {
+            font-size: 60px;
+            margin: 20px 0;
+        }
+
+        .modal-stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px 0;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--success-green);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+            z-index: 100;
+        }
+
+        .back-button:hover {
+            transform: scale(1.1);
+        }
+
+        @keyframes successPulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.15);
+            }
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-10px);
+            }
+
+            75% {
+                transform: translateX(10px);
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes dropIn {
+            from {
+                transform: scale(0) rotate(180deg);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <button class="back-button" onclick="window.location.href='game-hub-6-9.html'">
+        ← Back
+    </button>
+
+    <div class="game-container">
+        <div class="game-header">
+            <div class="game-title">
+                <span class="mascot">🧮</span>
+                <h1>Math Operations</h1>
+            </div>
+            <div class="score-display">
+                <div class="score-item">
+                    <div class="score-value" id="scoreValue">0</div>
+                    <div class="score-label">Score</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-value" id="solvedValue">0/6</div>
+                    <div class="score-label">Solved</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="instruction-box">
+            <p>🧮 Drag the correct answers to solve the math problems! 🎯</p>
+        </div>
+
+        <div class="game-board">
+            <div class="draggable-section">
+                <div class="section-title">🔢 Numbers</div>
+                <div class="number-items" id="numberItems">
+                    <div class="number-item" draggable="true" data-answer="5">5</div>
+                    <div class="number-item" draggable="true" data-answer="7">7</div>
+                    <div class="number-item" draggable="true" data-answer="9">9</div>
+                    <div class="number-item" draggable="true" data-answer="12">12</div>
+                    <div class="number-item" draggable="true" data-answer="15">15</div>
+                    <div class="number-item" draggable="true" data-answer="20">20</div>
+                </div>
+            </div>
+
+            <div class="draggable-section">
+                <div class="section-title">📝 Problems</div>
+                <div class="problems-section" id="problemsSection">
+                    <div class="math-problem">
+                        <span class="problem-number">3</span>
+                        <span class="operator">+</span>
+                        <span class="problem-number">2</span>
+                        <span class="equals">=</span>
+                        <div class="answer-slot" data-answer="5"></div>
+                    </div>
+                    <div class="math-problem">
+                        <span class="problem-number">10</span>
+                        <span class="operator">-</span>
+                        <span class="problem-number">3</span>
+                        <span class="equals">=</span>
+                        <div class="answer-slot" data-answer="7"></div>
+                    </div>
+                    <div class="math-problem">
+                        <span class="problem-number">6</span>
+                        <span class="operator">+</span>
+                        <span class="problem-number">6</span>
+                        <span class="equals">=</span>
+                        <div class="answer-slot" data-answer="12"></div>
+                    </div>
+                    <div class="math-problem">
+                        <span class="problem-number">5</span>
+                        <span class="operator">+</span>
+                        <span class="problem-number">4</span>
+                        <span class="equals">=</span>
+                        <div class="answer-slot" data-answer="9"></div>
+                    </div>
+                    <div class="math-problem">
+                        <span class="problem-number">8</span>
+                        <span class="operator">+</span>
+                        <span class="problem-number">7</span>
+                        <span class="equals">=</span>
+                        <div class="answer-slot" data-answer="15"></div>
+                    </div>
+                    <div class="math-problem">
+                        <span class="problem-number">25</span>
+                        <span class="operator">-</span>
+                        <span class="problem-number">5</span>
+                        <span class="equals">=</span>
+                        <div class="answer-slot" data-answer="20"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="completion-modal" id="completionModal">
+        <div class="modal-content">
+            <h2>🎉 Math Genius! 🎉</h2>
+            <div class="stars">⭐⭐⭐</div>
+            <p style="font-size: 20px; color: #666;">You solved all the problems!</p>
+            <div class="modal-stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="finalScore">0</div>
+                    <div class="stat-label">Total Score</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="finalAttempts">0</div>
+                    <div class="stat-label">Attempts</div>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-primary" onclick="resetGame()">🔄 Play Again</button>
+                <button class="btn btn-secondary" onclick="window.location.href='game-hub-6-9.html'">🏠 Back to
+                    Hub</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let score = 0;
+        let solved = 0;
+        let totalAttempts = 0;
+        let draggedElement = null;
+
+        const numberItems = document.querySelectorAll('.number-item');
+        const answerSlots = document.querySelectorAll('.answer-slot');
+
+        // Drag events for number items
+        numberItems.forEach(item => {
+            item.addEventListener('dragstart', handleDragStart);
+            item.addEventListener('dragend', handleDragEnd);
+        });
+
+        // Drop events for answer slots
+        answerSlots.forEach(slot => {
+            slot.addEventListener('dragover', handleDragOver);
+            slot.addEventListener('dragleave', handleDragLeave);
+            slot.addEventListener('drop', handleDrop);
+        });
+
+        function handleDragStart(e) {
+            if (this.classList.contains('used')) return;
+            draggedElement = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', this.innerHTML);
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+        }
+
+        function handleDragOver(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            if (!this.classList.contains('correct')) {
+                this.classList.add('drag-over');
+            }
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+
+        function handleDragLeave(e) {
+            this.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            if (e.stopPropagation) {
+                e.stopPropagation();
+            }
+
+            this.classList.remove('drag-over');
+
+            if (!draggedElement || this.classList.contains('correct')) {
+                return false;
+            }
+
+            totalAttempts++;
+            const draggedAnswer = draggedElement.getAttribute('data-answer');
+            const correctAnswer = this.getAttribute('data-answer');
+
+            if (draggedAnswer === correctAnswer) {
+                // Correct answer
+                playSound('success');
+                this.classList.add('correct');
+                draggedElement.classList.add('used');
+
+                // Create dropped answer visual
+                const droppedAnswer = document.createElement('div');
+                droppedAnswer.className = 'dropped-answer';
+                droppedAnswer.textContent = draggedAnswer;
+                this.appendChild(droppedAnswer);
+
+                score += 15;
+                solved++;
+                updateScore();
+
+                // Check if game is complete
+                if (solved === 6) {
+                    setTimeout(showCompletionModal, 500);
+                }
+            } else {
+                // Incorrect answer
+                playSound('error');
+                this.classList.add('incorrect');
+                setTimeout(() => {
+                    this.classList.remove('incorrect');
+                }, 500);
+            }
+
+            return false;
+        }
+
+        function updateScore() {
+            document.getElementById('scoreValue').textContent = score;
+            document.getElementById('solvedValue').textContent = `${solved}/6`;
+        }
+
+        function showCompletionModal() {
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('finalAttempts').textContent = totalAttempts;
+            document.getElementById('completionModal').classList.add('active');
+            playSound('complete');
+
+            // Save progress
+            saveProgress();
+        }
+
+        function resetGame() {
+            score = 0;
+            solved = 0;
+            totalAttempts = 0;
+            updateScore();
+
+            // Reset all items
+            numberItems.forEach(item => {
+                item.classList.remove('used');
+            });
+
+            answerSlots.forEach(slot => {
+                slot.classList.remove('correct', 'incorrect');
+                const droppedAnswer = slot.querySelector('.dropped-answer');
+                if (droppedAnswer) {
+                    droppedAnswer.remove();
+                }
+            });
+
+            document.getElementById('completionModal').classList.remove('active');
+        }
+
+        function playSound(type) {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            if (type === 'success') {
+                oscillator.frequency.value = 800;
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.3);
+            } else if (type === 'error') {
+                oscillator.frequency.value = 200;
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.2);
+            } else if (type === 'complete') {
+                [523, 659, 784].forEach((freq, i) => {
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+                    osc.frequency.value = freq;
+                    gain.gain.setValueAtTime(0.3, audioContext.currentTime + i * 0.15);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + i * 0.15 + 0.3);
+                    osc.start(audioContext.currentTime + i * 0.15);
+                    osc.stop(audioContext.currentTime + i * 0.15 + 0.3);
+                });
+            }
+        }
+
+        function saveProgress() {
+            const progress = {
+                game: 'math-operations',
+                score: score,
+                attempts: totalAttempts,
+                completed: true,
+                timestamp: new Date().toISOString()
+            };
+
+            let allProgress = JSON.parse(localStorage.getItem('gameProgress') || '[]');
+            allProgress.push(progress);
+            localStorage.setItem('gameProgress', JSON.stringify(allProgress));
+
+            let stats = JSON.parse(localStorage.getItem('userStats') || '{"stars": 0, "badges": 0}');
+            stats.stars += 3;
+            localStorage.setItem('userStats', JSON.stringify(stats));
+        }
+    </script>
+</body>
+
+</html>

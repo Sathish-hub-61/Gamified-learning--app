@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sing Rhymes - PlayLearn</title>
+
+    <link rel="stylesheet" href="css/global.css">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            min-height: 100vh;
+            padding: var(--spacing-md);
+        }
+
+        .game-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            margin-bottom: var(--spacing-lg);
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .rhyme-card {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-2xl);
+            margin-bottom: var(--spacing-lg);
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+        }
+
+        .rhyme-title {
+            font-size: var(--font-size-3xl);
+            color: var(--secondary-coral);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .rhyme-text {
+            font-size: var(--font-size-2xl);
+            line-height: 1.8;
+            color: var(--neutral-dark);
+            margin-bottom: var(--spacing-xl);
+            font-family: 'Quicksand', sans-serif;
+        }
+
+        .play-btn {
+            font-size: var(--font-size-2xl);
+            padding: var(--spacing-xl) var(--spacing-2xl);
+            margin: var(--spacing-md);
+        }
+
+        .rhyme-icon {
+            font-size: 6rem;
+            margin-bottom: var(--spacing-md);
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        .navigation {
+            display: flex;
+            gap: var(--spacing-md);
+            justify-content: center;
+            margin-top: var(--spacing-xl);
+        }
+
+        .nav-btn {
+            font-size: var(--font-size-xl);
+            padding: var(--spacing-lg) var(--spacing-xl);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1 style="color: var(--secondary-coral); margin: 0;">🎵 Sing Rhymes!</h1>
+        </div>
+
+        <div class="rhyme-card">
+            <div class="rhyme-icon" id="rhyme-icon">⭐</div>
+            <h2 class="rhyme-title" id="rhyme-title">Twinkle Twinkle Little Star</h2>
+            <div class="rhyme-text" id="rhyme-text">
+                Twinkle, twinkle, little star,<br>
+                How I wonder what you are!<br>
+                Up above the world so high,<br>
+                Like a diamond in the sky.
+            </div>
+
+            <button class="btn btn-primary play-btn" onclick="playRhyme()">
+                🔊 Listen
+            </button>
+
+            <div class="navigation">
+                <button class="btn btn-success nav-btn" onclick="previousRhyme()">
+                    ← Previous
+                </button>
+                <button class="btn btn-success nav-btn" onclick="nextRhyme()">
+                    Next →
+                </button>
+            </div>
+        </div>
+
+        <button class="btn btn-primary" onclick="window.location.href='game-hub-3-5.html'" style="width: 100%;">
+            ← Back to Games
+        </button>
+    </div>
+
+    <script src="js/audio-manager.js"></script>
+    <script>
+        const audioManager = new AudioManager();
+
+        const rhymes = [
+            {
+                title: "Twinkle Twinkle Little Star",
+                icon: "⭐",
+                text: "Twinkle, twinkle, little star,<br>How I wonder what you are!<br>Up above the world so high,<br>Like a diamond in the sky."
+            },
+            {
+                title: "Baa Baa Black Sheep",
+                icon: "🐑",
+                text: "Baa, baa, black sheep,<br>Have you any wool?<br>Yes sir, yes sir,<br>Three bags full!"
+            },
+            {
+                title: "Humpty Dumpty",
+                icon: "🥚",
+                text: "Humpty Dumpty sat on a wall,<br>Humpty Dumpty had a great fall.<br>All the king's horses and all the king's men,<br>Couldn't put Humpty together again."
+            },
+            {
+                title: "Jack and Jill",
+                icon: "🏔️",
+                text: "Jack and Jill went up the hill,<br>To fetch a pail of water.<br>Jack fell down and broke his crown,<br>And Jill came tumbling after."
+            },
+            {
+                title: "Mary Had a Little Lamb",
+                icon: "🐑",
+                text: "Mary had a little lamb,<br>Little lamb, little lamb,<br>Mary had a little lamb,<br>Its fleece was white as snow."
+            },
+            {
+                title: "Row Row Row Your Boat",
+                icon: "🚣",
+                text: "Row, row, row your boat,<br>Gently down the stream.<br>Merrily, merrily, merrily, merrily,<br>Life is but a dream."
+            }
+        ];
+
+        let currentRhyme = 0;
+
+        function displayRhyme() {
+            const rhyme = rhymes[currentRhyme];
+            document.getElementById('rhyme-icon').textContent = rhyme.icon;
+            document.getElementById('rhyme-title').textContent = rhyme.title;
+            document.getElementById('rhyme-text').innerHTML = rhyme.text;
+        }
+
+        function playRhyme() {
+            audioManager.playSound('success');
+            alert('🎵 Imagine the rhyme playing here!\n\n(In production, this would play actual audio)');
+        }
+
+        function nextRhyme() {
+            currentRhyme = (currentRhyme + 1) % rhymes.length;
+            displayRhyme();
+            audioManager.playSound('click');
+        }
+
+        function previousRhyme() {
+            currentRhyme = (currentRhyme - 1 + rhymes.length) % rhymes.length;
+            displayRhyme();
+            audioManager.playSound('click');
+        }
+
+        displayRhyme();
+    </script>
+</body>
+
+</html>

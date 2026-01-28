@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Select your child's age group for personalized learning">
+    <title>Select Age Group - PlayLearn</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/global.css">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-md);
+        }
+
+        .age-selection-container {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-2xl);
+            max-width: 800px;
+            width: 100%;
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .page-title {
+            color: var(--primary-teal);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .page-subtitle {
+            color: var(--neutral-medium);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .age-groups {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .age-card {
+            background: var(--neutral-bg);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            border: 3px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .age-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--gradient-primary);
+            opacity: 0;
+            transition: opacity var(--transition-base);
+            z-index: 0;
+        }
+
+        .age-card:hover::before {
+            opacity: 0.1;
+        }
+
+        .age-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-purple);
+        }
+
+        .age-card-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .age-icon {
+            font-size: 4rem;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .age-range {
+            font-size: var(--font-size-2xl);
+            font-weight: 700;
+            color: var(--neutral-dark);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .age-description {
+            font-size: var(--font-size-sm);
+            color: var(--neutral-medium);
+        }
+
+        .back-link {
+            color: var(--primary-blue);
+            text-decoration: none;
+            font-size: var(--font-size-base);
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            transition: all var(--transition-fast);
+        }
+
+        .back-link:hover {
+            gap: var(--spacing-sm);
+        }
+
+        @media (max-width: 768px) {
+            .age-groups {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="age-selection-container">
+        <h1 class="page-title">Choose Your Age Group</h1>
+        <p class="page-subtitle">This helps us personalize the learning experience</p>
+
+        <div class="age-groups">
+            <div class="age-card" onclick="selectAge('3-5')">
+                <div class="age-card-content">
+                    <div class="age-icon">🎨</div>
+                    <div class="age-range">3–5 Years</div>
+                    <p class="age-description">Rhymes, colors, and fun sounds!</p>
+                </div>
+            </div>
+
+            <div class="age-card" onclick="selectAge('6-9')">
+                <div class="age-card-content">
+                    <div class="age-icon">🎯</div>
+                    <div class="age-range">6–9 Years</div>
+                    <p class="age-description">Math games and word puzzles!</p>
+                </div>
+            </div>
+
+            <div class="age-card" onclick="selectAge('10-12')">
+                <div class="age-card-content">
+                    <div class="age-icon">🌟</div>
+                    <div class="age-range">10–12 Years</div>
+                    <p class="age-description">Adventures and real-world skills!</p>
+                </div>
+            </div>
+        </div>
+
+        <a href="index.html" class="back-link">
+            ← Back to Home
+        </a>
+    </div>
+
+    <script>
+        function selectAge(ageGroup) {
+            // Save selected age group
+            localStorage.setItem('selectedAgeGroup', ageGroup);
+            localStorage.setItem('ageSelectedDate', new Date().toISOString());
+
+            // Navigate based on age group
+            if (ageGroup === '3-5') {
+                window.location.href = 'game-hub-3-5.html';
+            } else if (ageGroup === '6-9') {
+                window.location.href = 'game-hub-6-9.html';
+            } else if (ageGroup === '10-12') {
+                window.location.href = 'game-hub.html';
+            }
+        }
+
+        // Check if consent was given
+        window.addEventListener('load', function () {
+            const hasConsent = localStorage.getItem('parentConsent');
+            if (hasConsent !== 'true') {
+                // Redirect back to landing if no consent
+                window.location.href = 'index.html';
+            }
+        });
+    </script>
+</body>
+
+</html>

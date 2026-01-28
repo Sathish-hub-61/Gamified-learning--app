@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animal Sounds - PlayLearn</title>
+
+    <link rel="stylesheet" href="css/global.css">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            min-height: 100vh;
+            padding: var(--spacing-md);
+        }
+
+        .game-container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            margin-bottom: var(--spacing-lg);
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .score {
+            font-size: var(--font-size-2xl);
+            font-weight: 700;
+            color: var(--secondary-gold);
+        }
+
+        .question-card {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-2xl);
+            margin-bottom: var(--spacing-lg);
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+        }
+
+        .question {
+            font-size: var(--font-size-2xl);
+            color: var(--neutral-dark);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .animal-display {
+            font-size: 10rem;
+            margin: var(--spacing-xl) 0;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        .sound-btn {
+            font-size: var(--font-size-2xl);
+            padding: var(--spacing-xl) var(--spacing-2xl);
+            margin-bottom: var(--spacing-xl);
+            width: 100%;
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--spacing-lg);
+        }
+
+        .option-btn {
+            font-size: var(--font-size-xl);
+            padding: var(--spacing-xl);
+            border-radius: var(--radius-lg);
+            border: 3px solid transparent;
+            transition: all var(--transition-base);
+        }
+
+        .option-btn:hover {
+            transform: scale(1.1);
+            border-color: var(--primary-purple);
+        }
+
+        .option-btn.correct {
+            background: var(--success);
+            color: var(--white);
+            animation: correctPulse 0.5s ease;
+        }
+
+        .option-btn.wrong {
+            background: var(--error);
+            color: var(--white);
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes correctPulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.15);
+            }
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-10px);
+            }
+
+            75% {
+                transform: translateX(10px);
+            }
+        }
+
+        .feedback {
+            margin-top: var(--spacing-lg);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-xl);
+            font-weight: 600;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1 style="color: var(--secondary-coral); margin: 0 0 var(--spacing-sm) 0;">🐶 Animal Sounds!</h1>
+            <div class="score">⭐ Score: <span id="score">0</span></div>
+        </div>
+
+        <div class="question-card">
+            <p class="question">What sound does this animal make?</p>
+
+            <div class="animal-display" id="animal-display">🐶</div>
+
+            <button class="btn btn-primary sound-btn" onclick="playSound()">
+                🔊 Hear the Sound!
+            </button>
+
+            <div class="options" id="options"></div>
+
+            <div class="feedback" id="feedback"></div>
+        </div>
+
+        <button class="btn btn-primary" onclick="window.location.href='game-hub-3-5.html'" style="width: 100%;">
+            ← Back to Games
+        </button>
+    </div>
+
+    <script src="js/audio-manager.js"></script>
+    <script>
+        const audioManager = new AudioManager();
+        let score = 0;
+        let currentQuestion = 0;
+
+        const animals = [
+            { emoji: '🐶', sound: 'Woof Woof!', options: ['Woof Woof!', 'Meow!', 'Moo!', 'Quack!'] },
+            { emoji: '🐱', sound: 'Meow!', options: ['Woof Woof!', 'Meow!', 'Moo!', 'Oink!'] },
+            { emoji: '🐮', sound: 'Moo!', options: ['Baa!', 'Meow!', 'Moo!', 'Quack!'] },
+            { emoji: '🐷', sound: 'Oink!', options: ['Woof Woof!', 'Neigh!', 'Moo!', 'Oink!'] },
+            { emoji: '🐴', sound: 'Neigh!', options: ['Neigh!', 'Meow!', 'Moo!', 'Quack!'] },
+            { emoji: '🦆', sound: 'Quack!', options: ['Woof Woof!', 'Meow!', 'Quack!', 'Oink!'] },
+            { emoji: '🐑', sound: 'Baa!', options: ['Baa!', 'Meow!', 'Moo!', 'Quack!'] },
+            { emoji: '🐔', sound: 'Cluck Cluck!', options: ['Woof Woof!', 'Cluck Cluck!', 'Moo!', 'Quack!'] }
+        ];
+
+        function loadQuestion() {
+            const animal = animals[currentQuestion];
+            document.getElementById('animal-display').textContent = animal.emoji;
+            document.getElementById('feedback').classList.remove('show');
+
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+
+            animal.options.forEach(option => {
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-success option-btn';
+                btn.textContent = option;
+                btn.onclick = () => checkAnswer(option);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function playSound() {
+            const animal = animals[currentQuestion];
+            alert(`🔊 ${animal.sound}\n\n(In production, this would play actual animal sounds)`);
+            audioManager.playSound('click');
+        }
+
+        function checkAnswer(selected) {
+            const animal = animals[currentQuestion];
+            const buttons = document.querySelectorAll('.option-btn');
+            const feedback = document.getElementById('feedback');
+
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                if (btn.textContent === animal.sound) {
+                    btn.classList.add('correct');
+                } else if (btn.textContent === selected && selected !== animal.sound) {
+                    btn.classList.add('wrong');
+                }
+            });
+
+            if (selected === animal.sound) {
+                score += 10;
+                document.getElementById('score').textContent = score;
+                feedback.textContent = `🎉 Yes! The animal says ${animal.sound}`;
+                feedback.style.background = 'var(--success)';
+                feedback.style.color = 'var(--white)';
+                feedback.classList.add('show');
+                audioManager.playSound('correct');
+
+                setTimeout(() => {
+                    currentQuestion = (currentQuestion + 1) % animals.length;
+                    loadQuestion();
+                }, 2500);
+            } else {
+                feedback.textContent = `Try again! The animal says ${animal.sound}`;
+                feedback.style.background = 'var(--warning)';
+                feedback.style.color = 'var(--white)';
+                feedback.classList.add('show');
+                audioManager.playSound('wrong');
+
+                setTimeout(() => {
+                    loadQuestion();
+                }, 2500);
+            }
+        }
+
+        loadQuestion();
+    </script>
+</body>
+
+</html>

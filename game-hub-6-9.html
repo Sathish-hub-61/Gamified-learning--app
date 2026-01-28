@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Educational games for ages 6-9">
+    <title>Game Hub - Ages 6-9 - PlayLearn</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/global.css">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            min-height: 100vh;
+            padding: var(--spacing-md);
+        }
+
+        .header {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+            box-shadow: var(--shadow-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: var(--spacing-md);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+        }
+
+        .mascot-small {
+            width: 60px;
+            height: 60px;
+        }
+
+        .user-info h2 {
+            color: var(--neutral-dark);
+            margin: 0;
+        }
+
+        .user-info p {
+            color: var(--neutral-medium);
+            margin: 0;
+            font-size: var(--font-size-sm);
+        }
+
+        .star-display {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            background: var(--secondary-gold);
+            padding: var(--spacing-xs) var(--spacing-md);
+            border-radius: var(--radius-full);
+            font-weight: 700;
+            font-size: var(--font-size-lg);
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: var(--spacing-lg);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .game-card {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            transition: all var(--transition-base);
+            cursor: pointer;
+        }
+
+        .game-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .game-header {
+            padding: var(--spacing-xl);
+            text-align: center;
+        }
+
+        .game-icon {
+            font-size: 4rem;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .game-title {
+            color: var(--neutral-dark);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .game-description {
+            color: var(--neutral-medium);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .game-badge {
+            display: inline-block;
+            background: var(--gradient-ocean);
+            color: var(--white);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-xs);
+            font-weight: 600;
+        }
+
+        .play-button {
+            width: 100%;
+            border-radius: 0;
+        }
+
+        .back-link {
+            position: fixed;
+            top: var(--spacing-md);
+            left: var(--spacing-md);
+            background: var(--white);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--radius-full);
+            text-decoration: none;
+            color: var(--neutral-dark);
+            font-weight: 600;
+            box-shadow: var(--shadow-md);
+            z-index: 100;
+        }
+
+        @media (max-width: 768px) {
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <a href="age-selection.html" class="back-link">← Back</a>
+
+    <div class="header">
+        <div class="header-left">
+            <img src="assets/images/mascot.png" alt="Mascot" class="mascot-small">
+            <div class="user-info">
+                <h2>Learning Hub</h2>
+                <p>Age 6-9 • Challenge yourself!</p>
+            </div>
+        </div>
+        <div class="star-display">
+            ⭐ <span id="star-count">0</span>
+        </div>
+    </div>
+
+    <div class="games-grid">
+        <!-- Math Quest -->
+        <div class="game-card slide-in-left" onclick="window.location.href='math-quest.html'">
+            <div class="game-header">
+                <div class="game-icon">🔢</div>
+                <span class="game-badge">Math</span>
+                <h3 class="game-title">Math Quest</h3>
+                <p class="game-description">Solve addition and subtraction problems!</p>
+            </div>
+            <button class="btn btn-primary play-button">Play Now →</button>
+        </div>
+
+        <!-- Word Wizard -->
+        <div class="game-card slide-in-right" onclick="window.location.href='word-wizard.html'">
+            <div class="game-header">
+                <div class="game-icon">📝</div>
+                <span class="game-badge">Language</span>
+                <h3 class="game-title">Word Wizard</h3>
+                <p class="game-description">Unscramble words and fill in missing letters!</p>
+            </div>
+            <button class="btn btn-success play-button">Play Now →</button>
+        </div>
+
+        <!-- Drag & Drop: Math Operations -->
+        <div class="game-card slide-in-left" onclick="window.location.href='drag-drop-math.html'">
+            <div class="game-header">
+                <div class="game-icon">🧮</div>
+                <span class="game-badge">Math</span>
+                <h3 class="game-title">Math Operations</h3>
+                <p class="game-description">Drag numbers to solve problems!</p>
+            </div>
+            <button class="btn btn-primary play-button">Play Now →</button>
+        </div>
+
+        <!-- Drag & Drop: Word Builder -->
+        <div class="game-card slide-in-right" onclick="window.location.href='drag-drop-words.html'">
+            <div class="game-header">
+                <div class="game-icon">✏️</div>
+                <span class="game-badge">Language</span>
+                <h3 class="game-title">Word Builder</h3>
+                <p class="game-description">Drag letters to spell words!</p>
+            </div>
+            <button class="btn btn-success play-button">Play Now →</button>
+        </div>
+    </div>
+
+    <script src="js/progress-tracker.js"></script>
+    <script src="js/audio-manager.js"></script>
+    <script>
+        const progressTracker = new ProgressTracker();
+        const audioManager = new AudioManager();
+
+        // Update star count
+        document.getElementById('star-count').textContent = progressTracker.totalStars;
+
+        audioManager.initBackgroundMusic('forest');
+    </script>
+</body>
+
+</html>

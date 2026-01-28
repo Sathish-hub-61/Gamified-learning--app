@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Choose your learning adventure">
+    <title>Game Hub - PlayLearn</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/global.css">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #2C3E50 0%, #4A5568 100%);
+            min-height: 100vh;
+            padding: var(--spacing-md);
+        }
+
+        .header {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-md);
+            flex-wrap: wrap;
+            gap: var(--spacing-md);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+        }
+
+        .mascot-small {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+        }
+
+        .user-info h2 {
+            color: var(--neutral-dark);
+            margin: 0;
+        }
+
+        .user-info p {
+            color: var(--neutral-medium);
+            margin: 0;
+            font-size: var(--font-size-sm);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+        }
+
+        .star-display {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            background: var(--secondary-gold);
+            padding: var(--spacing-xs) var(--spacing-md);
+            border-radius: var(--radius-full);
+            font-weight: 700;
+            font-size: var(--font-size-lg);
+        }
+
+        .mute-toggle {
+            background: var(--neutral-bg);
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: var(--font-size-xl);
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+
+        .mute-toggle:hover {
+            transform: scale(1.1);
+            background: var(--neutral-light);
+        }
+
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .welcome-section {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            margin-bottom: var(--spacing-lg);
+            text-align: center;
+            box-shadow: var(--shadow-md);
+        }
+
+        .welcome-section h1 {
+            color: var(--primary-purple);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .game-card {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            transition: all var(--transition-base);
+            cursor: pointer;
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .game-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .game-content {
+            padding: var(--spacing-lg);
+        }
+
+        .game-badge {
+            display: inline-block;
+            background: var(--gradient-success);
+            color: var(--white);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-xs);
+            font-weight: 600;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .game-title {
+            color: var(--neutral-dark);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .game-description {
+            color: var(--neutral-medium);
+            margin-bottom: var(--spacing-md);
+            font-size: var(--font-size-base);
+        }
+
+        .game-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: var(--spacing-md);
+            padding-top: var(--spacing-md);
+            border-top: 2px solid var(--neutral-bg);
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: var(--font-size-lg);
+            font-weight: 700;
+            color: var(--primary-purple);
+        }
+
+        .stat-label {
+            font-size: var(--font-size-xs);
+            color: var(--neutral-medium);
+        }
+
+        .play-button {
+            width: 100%;
+        }
+
+        .bottom-nav {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-md);
+            display: flex;
+            justify-content: space-around;
+            box-shadow: var(--shadow-md);
+        }
+
+        .nav-button {
+            background: none;
+            border: none;
+            color: var(--neutral-medium);
+            font-size: var(--font-size-sm);
+            cursor: pointer;
+            padding: var(--spacing-sm);
+            transition: all var(--transition-fast);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+
+        .nav-button:hover {
+            color: var(--primary-purple);
+        }
+
+        .nav-icon {
+            font-size: var(--font-size-xl);
+        }
+
+        @media (max-width: 768px) {
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="header-left">
+            <img src="assets/images/mascot.png" alt="Mascot" class="mascot-small">
+            <div class="user-info">
+                <h2>Learning Hub</h2>
+                <p>Age 10-12 • Let's explore!</p>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="star-display">
+                ⭐ <span id="star-count">0</span>
+            </div>
+            <button id="mute-toggle" class="mute-toggle" aria-label="Toggle sound">
+                🔊
+            </button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="welcome-section fade-in">
+            <h1>Choose Your Adventure!</h1>
+            <p>Each game teaches important skills while you play. Have fun! 🎮</p>
+        </div>
+
+        <div class="games-grid">
+            <!-- Eco Hero Quest -->
+            <div class="game-card slide-in-left" onclick="startGame('eco-hero-quest')">
+                <img src="assets/images/eco-positive.png" alt="Eco Hero Quest" class="game-image">
+                <div class="game-content">
+                    <span class="game-badge">🌍 Environmental</span>
+                    <h3 class="game-title">Eco Hero Quest</h3>
+                    <p class="game-description">
+                        Make choices that help our planet! Learn about saving water, reducing waste, and protecting
+                        nature.
+                    </p>
+                    <div class="game-stats">
+                        <div class="stat">
+                            <div class="stat-value" id="eco-progress">0%</div>
+                            <div class="stat-label">Progress</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="eco-stars">0</div>
+                            <div class="stat-label">Stars</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">10</div>
+                            <div class="stat-label">Levels</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-success play-button">
+                        Play Now →
+                    </button>
+                </div>
+            </div>
+
+            <!-- Safety Shield Adventure -->
+            <div class="game-card slide-in-right" onclick="startGame('safety-shield')">
+                <img src="assets/images/safety-badge.png" alt="Safety Shield Adventure" class="game-image">
+                <div class="game-content">
+                    <span class="game-badge" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        🛡️ Personal Safety
+                    </span>
+                    <h3 class="game-title">Safety Shield Adventure</h3>
+                    <p class="game-description">
+                        Build your safety shield! Learn to recognize safe situations and trusted adults.
+                    </p>
+                    <div class="game-stats">
+                        <div class="stat">
+                            <div class="stat-value" id="safety-progress">0%</div>
+                            <div class="stat-label">Progress</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="safety-stars">0</div>
+                            <div class="stat-label">Stars</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">10</div>
+                            <div class="stat-label">Levels</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary play-button">
+                        Play Now →
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <button class="nav-button" onclick="window.location.href='game-hub.html'">
+                <span class="nav-icon">🎮</span>
+                <span>Games</span>
+            </button>
+            <button class="nav-button" onclick="showBadges()">
+                <span class="nav-icon">🏆</span>
+                <span>Badges</span>
+            </button>
+            <button class="nav-button" onclick="window.location.href='parent-dashboard.html'">
+                <span class="nav-icon">👨‍👩‍👧</span>
+                <span>Parents</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/progress-tracker.js"></script>
+    <script src="js/audio-manager.js"></script>
+    <script>
+        // Initialize managers
+        const progressTracker = new ProgressTracker();
+        const audioManager = new AudioManager();
+
+        // Update UI with saved progress
+        function updateUI() {
+            document.getElementById('star-count').textContent = progressTracker.totalStars;
+
+            const gameData = progressTracker.getGameData();
+
+            // Update eco game stats
+            const ecoGame = gameData.find(g => g.id === 'eco-hero-quest');
+            if (ecoGame) {
+                document.getElementById('eco-progress').textContent = ecoGame.accuracy + '%';
+                document.getElementById('eco-stars').textContent = ecoGame.score;
+            }
+
+            // Update safety game stats
+            const safetyGame = gameData.find(g => g.id === 'safety-shield');
+            if (safetyGame) {
+                document.getElementById('safety-progress').textContent = safetyGame.accuracy + '%';
+                document.getElementById('safety-stars').textContent = safetyGame.score;
+            }
+        }
+
+        // Start game
+        function startGame(gameId) {
+            audioManager.playSound('click');
+
+            if (gameId === 'eco-hero-quest') {
+                window.location.href = 'eco-hero-quest.html';
+            } else if (gameId === 'safety-shield') {
+                window.location.href = 'safety-shield.html';
+            }
+        }
+
+        // Show badges modal
+        function showBadges() {
+            const badges = progressTracker.badges;
+
+            let badgeHTML = '<div class="modal-badges">';
+            if (badges.length === 0) {
+                badgeHTML += '<p>Complete games to earn badges!</p>';
+            } else {
+                badges.forEach(badge => {
+                    badgeHTML += `
+                        <div class="badge-item">
+                            <div class="badge-icon-large">${badge.icon}</div>
+                            <div class="badge-name">${badge.name}</div>
+                        </div>
+                    `;
+                });
+            }
+            badgeHTML += '</div>';
+
+            alert('Badges:\n\n' + badges.map(b => `${b.icon} ${b.name}`).join('\n') || 'No badges yet! Keep playing!');
+        }
+
+        // Mute toggle
+        document.getElementById('mute-toggle').addEventListener('click', function () {
+            audioManager.toggleMute();
+        });
+
+        // Initialize
+        window.addEventListener('load', function () {
+            audioManager.initBackgroundMusic('forest');
+            audioManager.updateMuteButton();
+            updateUI();
+        });
+    </script>
+</body>
+
+</html>

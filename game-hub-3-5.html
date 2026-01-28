@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Fun learning games for ages 3-5">
+    <title>Game Hub - Ages 3-5 - PlayLearn</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/global.css">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            min-height: 100vh;
+            padding: var(--spacing-md);
+        }
+
+        .header {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            margin-bottom: var(--spacing-lg);
+            box-shadow: var(--shadow-md);
+            text-align: center;
+        }
+
+        .mascot-large {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto var(--spacing-md);
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        .title {
+            color: var(--secondary-coral);
+            font-size: var(--font-size-3xl);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .subtitle {
+            color: var(--neutral-medium);
+            font-size: var(--font-size-xl);
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-xl);
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .game-card {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-2xl);
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            border: 4px solid transparent;
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px) scale(1.05);
+            border-color: var(--secondary-coral);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .game-icon {
+            font-size: 5rem;
+            margin-bottom: var(--spacing-md);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .game-title {
+            font-size: var(--font-size-2xl);
+            color: var(--neutral-dark);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .game-description {
+            font-size: var(--font-size-lg);
+            color: var(--neutral-medium);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .play-btn {
+            width: 100%;
+            font-size: var(--font-size-xl);
+            padding: var(--spacing-lg);
+        }
+
+        .back-link {
+            position: fixed;
+            top: var(--spacing-md);
+            left: var(--spacing-md);
+            background: var(--white);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--radius-full);
+            text-decoration: none;
+            color: var(--neutral-dark);
+            font-weight: 600;
+            box-shadow: var(--shadow-md);
+            transition: all var(--transition-base);
+        }
+
+        .back-link:hover {
+            transform: translateX(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        @media (max-width: 768px) {
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <a href="age-selection.html" class="back-link">← Back</a>
+
+    <div class="header fade-in">
+        <img src="assets/images/mascot.png" alt="Mascot" class="mascot-large">
+        <h1 class="title">Let's Play & Learn!</h1>
+        <p class="subtitle">Choose a fun game 🎨</p>
+    </div>
+
+    <div class="games-grid">
+        <!-- Rhymes Game -->
+        <div class="game-card slide-in-left" onclick="window.location.href='rhymes-game.html'">
+            <div class="game-icon">🎵</div>
+            <h2 class="game-title">Sing Rhymes</h2>
+            <p class="game-description">Listen and sing along!</p>
+            <button class="btn btn-primary play-btn">Play Now!</button>
+        </div>
+
+        <!-- Color Matching -->
+        <div class="game-card slide-in-right" onclick="window.location.href='color-match.html'">
+            <div class="game-icon">🎨</div>
+            <h2 class="game-title">Color Match</h2>
+            <p class="game-description">Match colors with fruits!</p>
+            <button class="btn btn-success play-btn">Play Now!</button>
+        </div>
+
+        <!-- Animal Sounds -->
+        <div class="game-card slide-in-left" onclick="window.location.href='animal-sounds.html'">
+            <div class="game-icon">🐶</div>
+            <h2 class="game-title">Animal Sounds</h2>
+            <p class="game-description">What sound does it make?</p>
+            <button class="btn btn-primary play-btn">Play Now!</button>
+        </div>
+
+        <!-- Drag & Drop: Colors -->
+        <div class="game-card slide-in-right" onclick="window.location.href='drag-drop-colors.html'">
+            <div class="game-icon">🌈</div>
+            <h2 class="game-title">Drag Colors</h2>
+            <p class="game-description">Drag and match colors!</p>
+            <button class="btn btn-success play-btn">Play Now!</button>
+        </div>
+
+        <!-- Drag & Drop: Counting -->
+        <div class="game-card slide-in-left" onclick="window.location.href='drag-drop-counting.html'">
+            <div class="game-icon">🔢</div>
+            <h2 class="game-title">Count & Match</h2>
+            <p class="game-description">Drag numbers to count!</p>
+            <button class="btn btn-primary play-btn">Play Now!</button>
+        </div>
+
+        <!-- Drag & Drop: Alphabets -->
+        <div class="game-card slide-in-right" onclick="window.location.href='drag-drop-alphabets.html'">
+            <div class="game-icon">🔤</div>
+            <h2 class="game-title">Letter Match</h2>
+            <p class="game-description">Match letters to pictures!</p>
+            <button class="btn btn-success play-btn">Play Now!</button>
+        </div>
+    </div>
+
+    <script src="js/audio-manager.js"></script>
+    <script>
+        const audioManager = new AudioManager();
+        audioManager.initBackgroundMusic('forest');
+    </script>
+</body>
+
+</html>

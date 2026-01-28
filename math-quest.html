@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Quest - PlayLearn</title>
+
+    <link rel="stylesheet" href="css/global.css">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            min-height: 100vh;
+            padding: var(--spacing-md);
+        }
+
+        .game-container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+            box-shadow: var(--shadow-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .score {
+            font-size: var(--font-size-xl);
+            font-weight: 700;
+            color: var(--primary-blue);
+        }
+
+        .question-card {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-2xl);
+            margin-bottom: var(--spacing-lg);
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+        }
+
+        .math-problem {
+            font-size: var(--font-size-3xl);
+            font-weight: 700;
+            color: var(--neutral-dark);
+            margin: var(--spacing-xl) 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .answer-input {
+            font-size: var(--font-size-2xl);
+            padding: var(--spacing-lg);
+            border: 3px solid var(--neutral-light);
+            border-radius: var(--radius-md);
+            text-align: center;
+            width: 200px;
+            margin: var(--spacing-lg) 0;
+        }
+
+        .answer-input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+        }
+
+        .submit-btn {
+            font-size: var(--font-size-xl);
+            padding: var(--spacing-md) var(--spacing-2xl);
+        }
+
+        .feedback {
+            margin-top: var(--spacing-lg);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-xl);
+            font-weight: 600;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.correct {
+            background: var(--success);
+            color: var(--white);
+        }
+
+        .feedback.wrong {
+            background: var(--error);
+            color: var(--white);
+        }
+
+        .back-btn {
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h2>🔢 Math Quest</h2>
+            <div class="score">Score: <span id="score">0</span></div>
+        </div>
+
+        <div class="question-card">
+            <p style="color: var(--neutral-medium); margin-bottom: var(--spacing-md);">
+                Solve the problem:
+            </p>
+
+            <div class="math-problem" id="problem">5 + 3 = ?</div>
+
+            <input type="number" class="answer-input" id="answer" placeholder="?" autofocus>
+
+            <br>
+
+            <button class="btn btn-primary submit-btn" onclick="checkAnswer()">
+                Check Answer ✓
+            </button>
+
+            <div class="feedback" id="feedback"></div>
+        </div>
+
+        <button class="btn btn-success back-btn" onclick="window.location.href='game-hub-6-9.html'">
+            ← Back to Games
+        </button>
+    </div>
+
+    <script src="js/audio-manager.js"></script>
+    <script>
+        const audioManager = new AudioManager();
+        let score = 0;
+        let currentProblem = {};
+
+        function generateProblem() {
+            const operations = ['+', '-'];
+            const op = operations[Math.floor(Math.random() * operations.length)];
+
+            let num1, num2, answer;
+
+            if (op === '+') {
+                num1 = Math.floor(Math.random() * 20) + 1;
+                num2 = Math.floor(Math.random() * 20) + 1;
+                answer = num1 + num2;
+            } else {
+                num1 = Math.floor(Math.random() * 20) + 10;
+                num2 = Math.floor(Math.random() * num1) + 1;
+                answer = num1 - num2;
+            }
+
+            currentProblem = { num1, num2, op, answer };
+            document.getElementById('problem').textContent = `${num1} ${op} ${num2} = ?`;
+            document.getElementById('answer').value = '';
+            document.getElementById('feedback').classList.remove('show');
+            document.getElementById('answer').focus();
+        }
+
+        function checkAnswer() {
+            const userAnswer = parseInt(document.getElementById('answer').value);
+            const feedback = document.getElementById('feedback');
+
+            if (isNaN(userAnswer)) {
+                feedback.textContent = 'Please enter a number!';
+                feedback.className = 'feedback wrong show';
+                return;
+            }
+
+            if (userAnswer === currentProblem.answer) {
+                score += 10;
+                document.getElementById('score').textContent = score;
+                feedback.textContent = `🎉 Correct! ${currentProblem.num1} ${currentProblem.op} ${currentProblem.num2} = ${currentProblem.answer}`;
+                feedback.className = 'feedback correct show';
+                audioManager.playSound('correct');
+
+                setTimeout(() => {
+                    generateProblem();
+                }, 2000);
+            } else {
+                feedback.textContent = `Not quite! Try again. The answer is ${currentProblem.answer}`;
+                feedback.className = 'feedback wrong show';
+                audioManager.playSound('wrong');
+
+                setTimeout(() => {
+                    generateProblem();
+                }, 3000);
+            }
+        }
+
+        // Allow Enter key to submit
+        document.getElementById('answer').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                checkAnswer();
+            }
+        });
+
+        // Initialize
+        generateProblem();
+    </script>
+</body>
+
+</html>

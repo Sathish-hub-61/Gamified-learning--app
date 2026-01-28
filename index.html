@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A safe, adaptive, gamified learning platform that teaches children through play, not pressure.">
+    <title>PlayLearn - Fun Learning for Kids</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/global.css">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-md);
+        }
+
+        .landing-container {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-2xl);
+            max-width: 600px;
+            width: 100%;
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .mascot-container {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .mascot-img {
+            width: 200px;
+            height: 200px;
+            object-fit: contain;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        .welcome-title {
+            color: var(--primary-purple);
+            margin-bottom: var(--spacing-sm);
+            font-size: var(--font-size-3xl);
+        }
+
+        .welcome-subtitle {
+            color: var(--neutral-medium);
+            font-size: var(--font-size-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .consent-section {
+            background: var(--neutral-bg);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--spacing-sm);
+            text-align: left;
+            margin-bottom: var(--spacing-lg);
+            cursor: pointer;
+        }
+
+        .checkbox-wrapper input[type="checkbox"] {
+            margin-top: 4px;
+            min-width: 24px;
+            min-height: 24px;
+        }
+
+        .checkbox-label {
+            font-size: var(--font-size-base);
+            color: var(--neutral-dark);
+            line-height: 1.5;
+        }
+
+        .terms-link {
+            color: var(--primary-blue);
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .start-btn {
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        .footer-note {
+            margin-top: var(--spacing-lg);
+            font-size: var(--font-size-sm);
+            color: var(--neutral-medium);
+        }
+
+        @media (max-width: 480px) {
+            .landing-container {
+                padding: var(--spacing-lg);
+            }
+
+            .mascot-img {
+                width: 150px;
+                height: 150px;
+            }
+
+            .welcome-title {
+                font-size: var(--font-size-2xl);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="landing-container">
+        <div class="mascot-container">
+            <img src="assets/images/mascot.png" alt="Friendly mascot character" class="mascot-img">
+        </div>
+
+        <h1 class="welcome-title">Welcome to PlayLearn!</h1>
+        <p class="welcome-subtitle">Where learning feels like playing 🎮</p>
+
+        <div class="consent-section">
+            <label class="checkbox-wrapper" for="parent-consent">
+                <input type="checkbox" id="parent-consent" aria-required="true">
+                <span class="checkbox-label">
+                    I am a parent/guardian and I agree to the 
+                    <span class="terms-link" onclick="showTerms()">Terms & Conditions</span>
+                </span>
+            </label>
+
+            <button id="start-btn" class="btn btn-primary btn-large btn-disabled" disabled>
+                Start Learning Adventure
+            </button>
+        </div>
+
+        <p class="footer-note">
+            🔒 Safe • 🎨 Fun • 📚 Educational
+        </p>
+    </div>
+
+    <!-- Terms Modal -->
+    <div id="terms-modal" class="overlay">
+        <div class="modal">
+            <h2>Terms & Conditions</h2>
+            <div style="max-height: 300px; overflow-y: auto; margin: var(--spacing-md) 0;">
+                <h3>Privacy & Safety</h3>
+                <p>• No personal data is permanently stored</p>
+                <p>• All progress is saved locally on your device</p>
+                <p>• No third-party tracking or advertising</p>
+                
+                <h3>Content</h3>
+                <p>• Age-appropriate educational content</p>
+                <p>• Parent-approved safety modules</p>
+                <p>• No external links or purchases</p>
+                
+                <h3>Usage</h3>
+                <p>• Designed for children ages 3-12</p>
+                <p>• Parental supervision recommended</p>
+                <p>• Free to use, no hidden costs</p>
+            </div>
+            <button class="btn btn-primary" onclick="closeTerms()">I Understand</button>
+        </div>
+    </div>
+
+    <script>
+        // Consent checkbox handling
+        const consentCheckbox = document.getElementById('parent-consent');
+        const startBtn = document.getElementById('start-btn');
+
+        consentCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                startBtn.classList.remove('btn-disabled');
+                startBtn.disabled = false;
+            } else {
+                startBtn.classList.add('btn-disabled');
+                startBtn.disabled = true;
+            }
+        });
+
+        // Start button
+        startBtn.addEventListener('click', function() {
+            if (consentCheckbox.checked) {
+                // Save consent
+                localStorage.setItem('parentConsent', 'true');
+                localStorage.setItem('consentDate', new Date().toISOString());
+                
+                // Navigate to age selection
+                window.location.href = 'age-selection.html';
+            }
+        });
+
+        // Terms modal
+        function showTerms() {
+            document.getElementById('terms-modal').classList.add('active');
+        }
+
+        function closeTerms() {
+            document.getElementById('terms-modal').classList.remove('active');
+        }
+
+        // Close modal on overlay click
+        document.getElementById('terms-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeTerms();
+            }
+        });
+
+        // Check if already consented
+        window.addEventListener('load', function() {
+            const hasConsent = localStorage.getItem('parentConsent');
+            if (hasConsent === 'true') {
+                // Auto-redirect to age selection
+                window.location.href = 'age-selection.html';
+            }
+        });
+    </script>
+</body>
+</html>

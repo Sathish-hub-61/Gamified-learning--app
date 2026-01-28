@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Match - PlayLearn</title>
+
+    <link rel="stylesheet" href="css/global.css">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            min-height: 100vh;
+            padding: var(--spacing-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .game-container {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-2xl);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .game-title {
+            font-size: var(--font-size-3xl);
+            color: var(--secondary-coral);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .question {
+            font-size: var(--font-size-2xl);
+            margin-bottom: var(--spacing-xl);
+            color: var(--neutral-dark);
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .option {
+            padding: var(--spacing-2xl);
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            border: 4px solid transparent;
+            font-size: var(--font-size-3xl);
+        }
+
+        .option:hover {
+            transform: scale(1.1);
+            border-color: var(--primary-purple);
+        }
+
+        .option.correct {
+            animation: correctPulse 0.5s ease;
+            border-color: var(--success);
+        }
+
+        @keyframes correctPulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.2);
+            }
+        }
+
+        .feedback {
+            font-size: var(--font-size-xl);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-md);
+            margin-top: var(--spacing-lg);
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.success {
+            background: var(--success);
+            color: var(--white);
+        }
+
+        .back-btn {
+            margin-top: var(--spacing-lg);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="game-container">
+        <h1 class="game-title">🎨 Color Match!</h1>
+        <p class="question" id="question">What color is this fruit?</p>
+
+        <div style="font-size: 8rem; margin: var(--spacing-xl) 0;" id="fruit-display">🍎</div>
+
+        <div class="options" id="options">
+            <div class="option" style="background: #FF0000;" onclick="checkAnswer('red')"></div>
+            <div class="option" style="background: #FFFF00;" onclick="checkAnswer('yellow')"></div>
+            <div class="option" style="background: #00FF00;" onclick="checkAnswer('green')"></div>
+            <div class="option" style="background: #0000FF;" onclick="checkAnswer('blue')"></div>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+
+        <button class="btn btn-primary back-btn" onclick="window.location.href='game-hub-3-5.html'">
+            ← Back to Games
+        </button>
+    </div>
+
+    <script src="js/audio-manager.js"></script>
+    <script>
+        const audioManager = new AudioManager();
+
+        const questions = [
+            { fruit: '🍎', color: 'red', name: 'Apple' },
+            { fruit: '🍌', color: 'yellow', name: 'Banana' },
+            { fruit: '🍇', color: 'blue', name: 'Grapes' },
+            { fruit: '🍏', color: 'green', name: 'Green Apple' },
+            { fruit: '🍊', color: 'red', name: 'Orange' }
+        ];
+
+        let currentQuestion = 0;
+
+        function loadQuestion() {
+            const q = questions[currentQuestion];
+            document.getElementById('fruit-display').textContent = q.fruit;
+            document.getElementById('feedback').classList.remove('show');
+        }
+
+        function checkAnswer(color) {
+            const q = questions[currentQuestion];
+            const feedback = document.getElementById('feedback');
+
+            if (color === q.color) {
+                feedback.textContent = `🎉 Yes! ${q.name} is ${color}!`;
+                feedback.className = 'feedback success show';
+                audioManager.playSound('correct');
+
+                setTimeout(() => {
+                    currentQuestion = (currentQuestion + 1) % questions.length;
+                    loadQuestion();
+                }, 2000);
+            } else {
+                feedback.textContent = `Try again! 💪`;
+                feedback.className = 'feedback show';
+                feedback.style.background = 'var(--warning)';
+                feedback.style.color = 'var(--white)';
+                audioManager.playSound('wrong');
+            }
+        }
+
+        loadQuestion();
+    </script>
+</body>
+
+</html>
