@@ -232,18 +232,18 @@
         let correctCount = 0;
 
         const allAnimals = [
-            { emoji: '🐶', sound: 'Woof Woof!', file: 'Dog.aac', options: ['Woof Woof!', 'Meow!', 'Moo!', 'Quack!'] },
-            { emoji: '🐱', sound: 'Meow!', file: 'Cat.aac', options: ['Woof Woof!', 'Meow!', 'Moo!', 'Oink!'] },
-            { emoji: '🐮', sound: 'Moo!', file: 'Cow.aac', options: ['Baa!', 'Meow!', 'Moo!', 'Quack!'] },
-            { emoji: '🐷', sound: 'Oink!', file: 'Pig.aac', options: ['Woof Woof!', 'Neigh!', 'Moo!', 'Oink!'] },
-            { emoji: '🐴', sound: 'Neigh!', file: 'Horse.aac', options: ['Neigh!', 'Meow!', 'Moo!', 'Quack!'] },
-            { emoji: '🦆', sound: 'Quack!', file: 'Duck.mpeg', options: ['Woof Woof!', 'Meow!', 'Quack!', 'Oink!'] },
-            { emoji: '🐑', sound: 'Baa!', file: 'Sheep.aac', options: ['Baa!', 'Meow!', 'Moo!', 'Quack!'] },
-            { emoji: '🐔', sound: 'Cluck Cluck!', file: 'Hen.aac', options: ['Woof Woof!', 'Cluck Cluck!', 'Moo!', 'Quack!'] },
-            { emoji: '🐸', sound: 'Ribbit!', file: 'Frog.mpeg', options: ['Ribbit!', 'Meow!', 'Moo!', 'Quack!'] },
-            { emoji: '🦁', sound: 'Roar!', file: 'Lion.aac', options: ['Woof Woof!', 'Roar!', 'Moo!', 'Quack!'] },
-            { emoji: '🐘', sound: 'Trumpet!', file: 'Elephant.mpeg', options: ['Trumpet!', 'Meow!', 'Moo!', 'Quack!'] },
-            { emoji: '🦉', sound: 'Hoot Hoot!', file: 'Owl.mpeg', options: ['Woof Woof!', 'Hoot Hoot!', 'Moo!', 'Quack!'] }
+            { emoji: '🐶', sound: 'Woof Woof!', file: 'dog.mp3', options: ['Woof Woof!', 'Meow!', 'Moo!', 'Quack!'] },
+            { emoji: '🐱', sound: 'Meow!', file: 'cat.mp3', options: ['Woof Woof!', 'Meow!', 'Moo!', 'Oink!'] },
+            { emoji: '🐮', sound: 'Moo!', file: 'cow.mp3', options: ['Baa!', 'Meow!', 'Moo!', 'Quack!'] },
+            { emoji: '🐷', sound: 'Oink!', file: 'pig.mp3', options: ['Woof Woof!', 'Neigh!', 'Moo!', 'Oink!'] },
+            { emoji: '🐴', sound: 'Neigh!', file: 'horse.mp3', options: ['Neigh!', 'Meow!', 'Moo!', 'Quack!'] },
+            { emoji: '🦆', sound: 'Quack!', file: 'duck.mp3', options: ['Woof Woof!', 'Meow!', 'Quack!', 'Oink!'] },
+            { emoji: '🐑', sound: 'Baa!', file: 'sheep.mp3', options: ['Baa!', 'Meow!', 'Moo!', 'Quack!'] },
+            { emoji: '🐔', sound: 'Cluck Cluck!', file: 'hen.mp3', options: ['Woof Woof!', 'Cluck Cluck!', 'Moo!', 'Quack!'] },
+            { emoji: '🐸', sound: 'Ribbit!', file: 'frog.mp3', options: ['Ribbit!', 'Meow!', 'Moo!', 'Quack!'] },
+            { emoji: '🦁', sound: 'Roar!', file: 'lion.mp3', options: ['Woof Woof!', 'Roar!', 'Moo!', 'Quack!'] },
+            { emoji: '🐘', sound: 'Trumpet!', file: 'elephant.mp3', options: ['Trumpet!', 'Meow!', 'Moo!', 'Quack!'] },
+            { emoji: '🦉', sound: 'Hoot Hoot!', file: 'owl.mp3', options: ['Woof Woof!', 'Hoot Hoot!', 'Moo!', 'Quack!'] }
         ];
 
         // Shuffle function
@@ -285,7 +285,7 @@
         function playSound() {
             const animal = shuffledAnimals[currentQuestion];
             if (animal.file && !audioManager.isMuted) {
-                const audioPath = `assets/audio/Animal Sounds/${animal.file}`;
+                const audioPath = `assets/audio/animal-sounds/${animal.file}`;
                 const audioInstance = new Audio(audioPath);
                 audioInstance.play().catch(e => console.error("Error playing animal sound:", e));
             }
