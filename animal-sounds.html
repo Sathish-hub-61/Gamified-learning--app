@@ -283,20 +283,12 @@
         }
 
         function playSound() {
-            if (audioManager.isMuted) return;
-
             const animal = shuffledAnimals[currentQuestion];
-
-            // Use Web Speech API to say the sound (e.g., "Woof Woof")
-            // This ensures every animal has a distinct sound immediately without needing separate MP3s
-            const utterance = new SpeechSynthesisUtterance(animal.sound);
-            utterance.rate = 0.9;
-            utterance.pitch = 1.1;
-            utterance.lang = 'en-US';
-
-            window.speechSynthesis.cancel(); // Stop any previous speech
-            window.speechSynthesis.speak(utterance);
-
+            if (animal.file && !audioManager.isMuted) {
+                const audioPath = `assets/animal-sounds/${animal.file}`;
+                const audioInstance = new Audio(audioPath);
+                audioInstance.play().catch(e => console.error("Error playing animal sound:", e));
+            }
             audioManager.playSound('click');
         }
 
