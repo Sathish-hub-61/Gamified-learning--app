@@ -285,7 +285,7 @@
         function playSound() {
             const animal = shuffledAnimals[currentQuestion];
             if (animal.file && !audioManager.isMuted) {
-                const audioPath = `assets/audio/animal-sounds/${animal.file}`;
+                const audioPath = `assets/animal-sounds/${animal.file}`;
                 const audioInstance = new Audio(audioPath);
                 audioInstance.play().catch(e => console.error("Error playing animal sound:", e));
             }
