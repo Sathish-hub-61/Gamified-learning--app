@@ -100,6 +100,39 @@
         .back-btn {
             width: 100%;
         }
+
+        /* Completion Modal */
+        .completion-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .completion-modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 30px;
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-content h2 {
+            color: var(--primary-blue);
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 
@@ -133,10 +166,39 @@
         </button>
     </div>
 
+    <div class="completion-modal" id="completionModal">
+        <div class="modal-content">
+            <h2>🎉 Math Mission Complete! 🎉</h2>
+            <p style="font-size: 20px; color: var(--neutral-medium);">You solved 10 math problems!</p>
+            <div style="font-size: 32px; font-weight: 700; color: var(--primary-blue); margin: 20px 0;">
+                Final Score: <span id="finalScore">0</span>
+            </div>
+            <div style="display: flex; gap: 15px; justify-content: center; margin-top: 30px;">
+                <button class="btn btn-primary" onclick="resetGame()">🔄 Play Again</button>
+                <button class="btn btn-secondary" onclick="window.location.href='game-hub-6-9.html'">🏠 Home</button>
+            </div>
+        </div>
+    </div>
+
+    <button id="mute-toggle" class="btn-mute"
+        style="position: fixed; bottom: 20px; right: 20px; font-size: 20px; background: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; box-shadow: var(--shadow-md); z-index: 1000;">🔊</button>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="js/progress-service.js"></script>
     <script src="js/audio-manager.js"></script>
     <script>
+        const GAME_ID = 'math-quest';
         const audioManager = new AudioManager();
+        audioManager.initBackgroundMusic();
+
+        document.getElementById('mute-toggle').addEventListener('click', () => {
+            audioManager.toggleMute();
+            audioManager.playSound('click');
+        });
+
         let score = 0;
+        let questionsPlayed = 0;
+        let correctAnswers = 0;
         let currentProblem = {};
 
         function generateProblem() {
@@ -174,23 +236,47 @@
 
             if (userAnswer === currentProblem.answer) {
                 score += 10;
+                correctAnswers++;
                 document.getElementById('score').textContent = score;
                 feedback.textContent = `🎉 Correct! ${currentProblem.num1} ${currentProblem.op} ${currentProblem.num2} = ${currentProblem.answer}`;
                 feedback.className = 'feedback correct show';
                 audioManager.playSound('correct');
-
-                setTimeout(() => {
-                    generateProblem();
-                }, 2000);
             } else {
                 feedback.textContent = `Not quite! Try again. The answer is ${currentProblem.answer}`;
                 feedback.className = 'feedback wrong show';
                 audioManager.playSound('wrong');
-
-                setTimeout(() => {
-                    generateProblem();
-                }, 3000);
             }
+
+            questionsPlayed++;
+
+            if (questionsPlayed >= 10) {
+                setTimeout(showCompletion, 1500);
+            } else {
+                setTimeout(generateProblem, userAnswer === currentProblem.answer ? 2000 : 3000);
+            }
+        }
+
+        async function showCompletion() {
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('completionModal').classList.add('active');
+
+            if (window.saveGameProgress) {
+                await window.saveGameProgress(GAME_ID, {
+                    score: score,
+                    completed: true,
+                    correctAnswers: correctAnswers,
+                    attempts: questionsPlayed
+                });
+            }
+        }
+
+        function resetGame() {
+            score = 0;
+            questionsPlayed = 0;
+            correctAnswers = 0;
+            document.getElementById('score').textContent = '0';
+            document.getElementById('completionModal').classList.remove('active');
+            generateProblem();
         }
 
         // Allow Enter key to submit
@@ -203,6 +289,7 @@
         // Initialize
         generateProblem();
     </script>
+    <script type="module" src="js/progress-service.js"></script>
 </body>
 
 </html>

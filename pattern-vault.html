@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pattern Vault - PlayLearn</title>
+    <link rel="stylesheet" href="css/global.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            min-height: 100vh;
+            padding: 20px;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .game-header {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-top: 80px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .vault-container {
+            background: white;
+            border-radius: 25px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .pattern-sequence {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .pattern-number {
+            width: 70px;
+            height: 70px;
+            background: white;
+            border: 3px solid #f5576c;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .ans-grid {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .ans-btn {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 32px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .back-nav {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 1.8rem;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="game-hub.html" class="back-nav">🏠</a>
+    <button id="mute-toggle" class="btn-mute"
+        style="position: fixed; bottom: 20px; right: 20px; font-size: 20px; background: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; box-shadow: var(--shadow-md); z-index: 1000;">🔊</button>
+
+    <div class="game-header">
+        <h1 style="color: #f5576c;">Pattern Vault</h1>
+        <div id="score">Score: 0</div>
+    </div>
+
+    <div class="vault-container">
+        <div class="pattern-sequence" id="pattern-seq"></div>
+        <div class="ans-grid" id="ans-grid"></div>
+    </div>
+
+    <script src="js/firebase-config.js"></script>
+    <script type="module" src="js/progress-service.js"></script>
+    <script src="js/progress-tracker.js"></script>
+    <script src="js/audio-manager.js"></script>
+    <script>
+        const GAME_ID = 'pattern-vault';
+        const tracker = new ProgressTracker();
+        const audio = new AudioManager();
+        audio.initBackgroundMusic();
+
+        document.getElementById('mute-toggle').addEventListener('click', () => {
+            audio.toggleMute();
+            audio.playSound('click');
+        });
+        let score = 0;
+        let step = 0;
+
+        const levels = [
+            { seq: [2, 4, 6, 8], ans: 10 },
+            { seq: [5, 10, 15, 20], ans: 25 },
+            { seq: [1, 2, 4, 8], ans: 16 }
+        ];
+
+        function load() {
+            const data = levels[step];
+            const seq = document.getElementById('pattern-seq');
+            seq.innerHTML = '';
+            data.seq.forEach(n => {
+                const b = document.createElement('div');
+                b.className = 'pattern-number';
+                b.textContent = n;
+                seq.appendChild(b);
+            });
+            const q = document.createElement('div');
+            q.className = 'pattern-number';
+            q.textContent = '?';
+            q.style.borderColor = '#fdcb6e';
+            seq.appendChild(q);
+
+            const grid = document.getElementById('ans-grid');
+            grid.innerHTML = '';
+            [data.ans, data.ans + 2, data.ans - 1].sort().forEach(n => {
+                const b = document.createElement('button');
+                b.className = 'ans-btn';
+                b.textContent = n;
+                b.onclick = () => check(n);
+                grid.appendChild(b);
+            });
+        }
+
+        function check(val) {
+            if (val === levels[step].ans) {
+                audio.playSound('correct');
+                score += 50;
+                step++;
+                if (step < levels.length) load();
+                else {
+                    tracker.addStars(score);
+                    tracker.completeGame('pattern-vault', score, 100);
+
+                    if (window.saveGameProgress) {
+                        window.saveGameProgress(GAME_ID, {
+                            score: score,
+                            completed: true,
+                            correctAnswers: step,
+                            attempts: step
+                        });
+                    }
+
+                    alert("Vault Unlocked!");
+                    window.location.href = 'game-hub.html';
+                }
+            } else {
+                audio.playSound('wrong');
+            }
+        }
+
+        window.onload = load;
+    </script>
+</body>
+
+</html>

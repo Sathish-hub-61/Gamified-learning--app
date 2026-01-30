@@ -134,10 +134,71 @@
         .feedback.show {
             display: block;
         }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+            z-index: 1000;
+            font-size: 16px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            background: #FF69B4;
+            color: white;
+        }
+
+        .parents-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+            z-index: 1000;
+            font-size: 16px;
+            font-weight: 700;
+            color: #9370DB;
+            text-decoration: none;
+        }
+
+        .parents-button:hover {
+            transform: translateY(-2px);
+            background: #9370DB;
+            color: white;
+        }
     </style>
 </head>
 
 <body>
+    <button class="back-button" onclick="window.location.href='game-hub-3-5.html'">
+        ← Back
+    </button>
+    <a href="parent-dashboard-3-5.html" class="parents-button">
+        👨‍👩‍👧 Parents
+    </a>
     <div class="game-container">
         <div class="header">
             <h1 style="color: var(--secondary-coral); margin: 0 0 var(--spacing-sm) 0;">🐶 Animal Sounds!</h1>
@@ -158,30 +219,54 @@
             <div class="feedback" id="feedback"></div>
         </div>
 
-        <button class="btn btn-primary" onclick="window.location.href='game-hub-3-5.html'" style="width: 100%;">
-            ← Back to Games
-        </button>
     </div>
 
     <script src="js/audio-manager.js"></script>
     <script>
         const audioManager = new AudioManager();
+        const GAME_ID = 'animal-sounds';
         let score = 0;
         let currentQuestion = 0;
+        let shuffledAnimals = [];
+        let totalAttempts = 0;
+        let correctCount = 0;
 
-        const animals = [
-            { emoji: '🐶', sound: 'Woof Woof!', options: ['Woof Woof!', 'Meow!', 'Moo!', 'Quack!'] },
-            { emoji: '🐱', sound: 'Meow!', options: ['Woof Woof!', 'Meow!', 'Moo!', 'Oink!'] },
-            { emoji: '🐮', sound: 'Moo!', options: ['Baa!', 'Meow!', 'Moo!', 'Quack!'] },
-            { emoji: '🐷', sound: 'Oink!', options: ['Woof Woof!', 'Neigh!', 'Moo!', 'Oink!'] },
-            { emoji: '🐴', sound: 'Neigh!', options: ['Neigh!', 'Meow!', 'Moo!', 'Quack!'] },
-            { emoji: '🦆', sound: 'Quack!', options: ['Woof Woof!', 'Meow!', 'Quack!', 'Oink!'] },
-            { emoji: '🐑', sound: 'Baa!', options: ['Baa!', 'Meow!', 'Moo!', 'Quack!'] },
-            { emoji: '🐔', sound: 'Cluck Cluck!', options: ['Woof Woof!', 'Cluck Cluck!', 'Moo!', 'Quack!'] }
+        const allAnimals = [
+            { emoji: '🐶', sound: 'Woof Woof!', file: 'Dog.aac', options: ['Woof Woof!', 'Meow!', 'Moo!', 'Quack!'] },
+            { emoji: '🐱', sound: 'Meow!', file: 'Cat.aac', options: ['Woof Woof!', 'Meow!', 'Moo!', 'Oink!'] },
+            { emoji: '🐮', sound: 'Moo!', file: 'Cow.aac', options: ['Baa!', 'Meow!', 'Moo!', 'Quack!'] },
+            { emoji: '🐷', sound: 'Oink!', file: 'Pig.aac', options: ['Woof Woof!', 'Neigh!', 'Moo!', 'Oink!'] },
+            { emoji: '🐴', sound: 'Neigh!', file: 'Horse.aac', options: ['Neigh!', 'Meow!', 'Moo!', 'Quack!'] },
+            { emoji: '🦆', sound: 'Quack!', file: 'Duck.mpeg', options: ['Woof Woof!', 'Meow!', 'Quack!', 'Oink!'] },
+            { emoji: '🐑', sound: 'Baa!', file: 'Sheep.aac', options: ['Baa!', 'Meow!', 'Moo!', 'Quack!'] },
+            { emoji: '🐔', sound: 'Cluck Cluck!', file: 'Hen.aac', options: ['Woof Woof!', 'Cluck Cluck!', 'Moo!', 'Quack!'] },
+            { emoji: '🐸', sound: 'Ribbit!', file: 'Frog.mpeg', options: ['Ribbit!', 'Meow!', 'Moo!', 'Quack!'] },
+            { emoji: '🦁', sound: 'Roar!', file: 'Lion.aac', options: ['Woof Woof!', 'Roar!', 'Moo!', 'Quack!'] },
+            { emoji: '🐘', sound: 'Trumpet!', file: 'Elephant.mpeg', options: ['Trumpet!', 'Meow!', 'Moo!', 'Quack!'] },
+            { emoji: '🦉', sound: 'Hoot Hoot!', file: 'Owl.mpeg', options: ['Woof Woof!', 'Hoot Hoot!', 'Moo!', 'Quack!'] }
         ];
 
+        // Shuffle function
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // Initialize game with shuffled animals
+        function initGame() {
+            shuffledAnimals = shuffleArray(allAnimals);
+            currentQuestion = 0;
+            score = 0;
+            document.getElementById('score').textContent = score;
+            loadQuestion();
+        }
+
         function loadQuestion() {
-            const animal = animals[currentQuestion];
+            const animal = shuffledAnimals[currentQuestion];
             document.getElementById('animal-display').textContent = animal.emoji;
             document.getElementById('feedback').classList.remove('show');
 
@@ -198,15 +283,20 @@
         }
 
         function playSound() {
-            const animal = animals[currentQuestion];
-            alert(`🔊 ${animal.sound}\n\n(In production, this would play actual animal sounds)`);
+            const animal = shuffledAnimals[currentQuestion];
+            if (animal.file && !audioManager.isMuted) {
+                const audioPath = `assets/audio/Animal Sounds/${animal.file}`;
+                const audioInstance = new Audio(audioPath);
+                audioInstance.play().catch(e => console.error("Error playing animal sound:", e));
+            }
             audioManager.playSound('click');
         }
 
         function checkAnswer(selected) {
-            const animal = animals[currentQuestion];
+            const animal = shuffledAnimals[currentQuestion];
             const buttons = document.querySelectorAll('.option-btn');
             const feedback = document.getElementById('feedback');
+            totalAttempts++;
 
             buttons.forEach(btn => {
                 btn.disabled = true;
@@ -218,6 +308,7 @@
             });
 
             if (selected === animal.sound) {
+                correctCount++;
                 score += 10;
                 document.getElementById('score').textContent = score;
                 feedback.textContent = `🎉 Yes! The animal says ${animal.sound}`;
@@ -227,7 +318,18 @@
                 audioManager.playSound('correct');
 
                 setTimeout(() => {
-                    currentQuestion = (currentQuestion + 1) % animals.length;
+                    const wasLastQuestion = currentQuestion === shuffledAnimals.length - 1;
+                    currentQuestion = (currentQuestion + 1) % shuffledAnimals.length;
+
+                    if (window.saveGameProgress) {
+                        window.saveGameProgress(GAME_ID, {
+                            score: score,
+                            completed: wasLastQuestion,
+                            attempts: totalAttempts,
+                            correctAnswers: correctCount
+                        });
+                    }
+
                     loadQuestion();
                 }, 2500);
             } else {
@@ -243,8 +345,10 @@
             }
         }
 
-        loadQuestion();
+        // Initialize game on page load
+        initGame();
     </script>
+    <script type="module" src="js/progress-service.js"></script>
 </body>
 
 </html>

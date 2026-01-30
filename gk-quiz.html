@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GK Quiz Challenge - PlayLearn</title>
+    <link rel="stylesheet" href="css/global.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .quiz-card {
+            background: white;
+            border-radius: 35px;
+            padding: 40px;
+            max-width: 750px;
+            width: 100%;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .question-number {
+            background: #e6fffa;
+            color: #2c7a7b;
+            padding: 10px 18px;
+            border-radius: 15px;
+            font-weight: 800;
+            font-size: 0.95rem;
+        }
+
+        .score-display {
+            font-size: 1.2rem;
+            font-weight: 900;
+            color: #2d3748;
+            background: #f7fafc;
+            padding: 10px 18px;
+            border-radius: 15px;
+        }
+
+        .question-text {
+            font-size: 1.7rem;
+            color: #1a202c;
+            margin-bottom: 30px;
+            line-height: 1.4;
+            font-weight: 700;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .option-btn {
+            background: white;
+            border: 2px solid #edf2f7;
+            border-radius: 18px;
+            padding: 20px;
+            font-size: 1.1rem;
+            color: #4a5568;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .option-btn:hover {
+            border-color: #38ef7d;
+            background: #f0fff4;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .option-btn.correct {
+            background: #c6f6d5;
+            border-color: #48bb78;
+            color: #22543d;
+        }
+
+        .option-btn.wrong {
+            background: #fed7d7;
+            border-color: #f56565;
+            color: #742a2a;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 10px;
+            background: #edf2f7;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #11998e, #38ef7d);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .result-screen {
+            text-align: center;
+            display: none;
+        }
+
+        .trophy {
+            font-size: 5rem;
+            margin-bottom: 20px;
+        }
+
+        .back-to-hub {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 1.8rem;
+            text-decoration: none;
+            z-index: 10;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="game-hub.html" class="back-to-hub">🏠</a>
+    <button id="mute-toggle" class="btn-mute"
+        style="position: fixed; bottom: 20px; right: 20px; font-size: 20px; background: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; box-shadow: var(--shadow-md); z-index: 1000;">🔊</button>
+
+    <div class="quiz-card">
+        <div id="quiz-ui">
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="progress-bar"></div>
+            </div>
+
+            <div class="quiz-header">
+                <span class="question-number" id="q-number">Question 1/10</span>
+                <span class="score-display">⭐ <span id="score">0</span></span>
+            </div>
+
+            <h2 class="question-text" id="question-text">Loading...</h2>
+
+            <div class="options-grid" id="options-grid"></div>
+        </div>
+
+        <div id="result-ui" class="result-screen">
+            <div class="trophy">🏆</div>
+            <h1 id="result-title" style="font-size: 2.2rem; color: #2d3748;">Great Job!</h1>
+            <p style="font-size: 1.3rem; color: #4a5568; margin: 20px 0;">
+                You earned <span id="final-score" style="color: #38ef7d; font-weight: 900;">0</span> Stars!
+            </p>
+            <button class="btn btn-primary" style="padding: 12px 35px; font-size: 1.1rem;"
+                onclick="window.location.href='game-hub.html'">Return to Hub</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/progress-tracker.js"></script>
+    <script src="js/audio-manager.js"></script>
+    <script type="module" src="js/progress-service.js"></script>
+
+    <script>
+        const questions = [
+            { q: "Who is the President of India?", options: ["Narendra Modi", "Droupadi Murmu", "Amit Shah", "Rahul Gandhi"], correct: 1 },
+            { q: "What is the capital of Japan?", options: ["Seoul", "Beijing", "Tokyo", "Bangkok"], correct: 2 },
+            { q: "Who invented the telephone?", options: ["Thomas Edison", "Nikola Tesla", "Alexander Graham Bell", "Albert Einstein"], correct: 2 },
+            { q: "Which is the largest planet in our solar system?", options: ["Earth", "Mars", "Saturn", "Jupiter"], correct: 3 },
+            { q: "What is the national animal of India?", options: ["Lion", "Elephant", "Tiger", "Leopard"], correct: 2 },
+            { q: "In which city is the Eiffel Tower located?", options: ["London", "Paris", "Berlin", "Rome"], correct: 1 },
+            { q: "Who is known as the 'Father of the Nation' in India?", options: ["Jawaharlal Nehru", "Mahatma Gandhi", "Subhash Chandra Bose", "B.R. Ambedkar"], correct: 1 },
+            { q: "Which gas do plants absorb from the atmosphere?", options: ["Oxygen", "Nitrogen", "Carbon Dioxide", "Hydrogen"], correct: 2 },
+            { q: "Who wrote the national anthem of India?", options: ["Bankim Chandra Chatterjee", "Rabindranath Tagore", "Sarojini Naidu", "Gulzar"], correct: 1 },
+            { q: "What is the hardest natural substance on Earth?", options: ["Gold", "Iron", "Diamond", "Platinum"], correct: 2 }
+        ];
+
+        let currentQ = 0;
+        let score = 0;
+        let canAnswer = true;
+        const tracker = new ProgressTracker();
+        const audio = new AudioManager();
+        audio.initBackgroundMusic();
+
+        document.getElementById('mute-toggle').addEventListener('click', () => {
+            audio.toggleMute();
+            audio.playSound('click');
+        });
+
+        function loadQuestion() {
+            const question = questions[currentQ];
+            document.getElementById('question-text').textContent = question.q;
+            document.getElementById('q-number').textContent = `Question ${currentQ + 1}/${questions.length}`;
+            document.getElementById('progress-bar').style.width = `${(currentQ / questions.length) * 100}%`;
+
+            const grid = document.getElementById('options-grid');
+            grid.innerHTML = '';
+
+            question.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = opt;
+                btn.onclick = () => checkAnswer(idx, btn);
+                grid.appendChild(btn);
+            });
+            canAnswer = true;
+        }
+
+        function checkAnswer(idx, btn) {
+            if (!canAnswer) return;
+            canAnswer = false;
+
+            const question = questions[currentQ];
+            const allBtns = document.querySelectorAll('.option-btn');
+
+            if (idx === question.correct) {
+                audio.playSound('correct');
+                score += 10;
+                btn.classList.add('correct');
+                document.getElementById('score').textContent = score;
+            } else {
+                audio.playSound('wrong');
+                btn.classList.add('wrong');
+                allBtns[question.correct].classList.add('correct');
+            }
+
+            setTimeout(() => {
+                currentQ++;
+                if (currentQ < questions.length) {
+                    loadQuestion();
+                } else {
+                    showFinalResult();
+                }
+            }, 1000);
+        }
+
+        async function showFinalResult() {
+            document.getElementById('quiz-ui').style.display = 'none';
+            document.getElementById('result-ui').style.display = 'block';
+            document.getElementById('progress-bar').style.width = '100%';
+            document.getElementById('final-score').textContent = score;
+
+            tracker.completeGame('gk-quiz', score, (score / 100) * 100);
+            tracker.addStars(score);
+
+            if (window.saveGameProgress) {
+                await window.saveGameProgress('gk-quiz', {
+                    score: score,
+                    completed: true,
+                    accuracy: (score / 100) * 100
+                });
+            }
+        }
+
+        window.onload = loadQuestion;
+    </script>
+    <script type="module" src="js/progress-service.js"></script>
+</body>
+
+</html>

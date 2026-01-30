@@ -42,7 +42,7 @@
 
         .options {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: var(--spacing-lg);
             margin-bottom: var(--spacing-xl);
         }
@@ -95,13 +95,72 @@
             color: var(--white);
         }
 
-        .back-btn {
-            margin-top: var(--spacing-lg);
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+            z-index: 1000;
+            font-size: 16px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            background: #FF69B4;
+            color: white;
+        }
+
+        .parents-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+            z-index: 1000;
+            font-size: 16px;
+            font-weight: 700;
+            color: #9370DB;
+            text-decoration: none;
+        }
+
+        .parents-button:hover {
+            transform: translateY(-2px);
+            background: #9370DB;
+            color: white;
         }
     </style>
 </head>
 
 <body>
+    <button class="back-button" onclick="window.location.href='game-hub-3-5.html'">
+        ← Back
+    </button>
+    <a href="parent-dashboard-3-5.html" class="parents-button">
+        👨‍👩‍👧 Parents
+    </a>
+    <button id="mute-toggle" class="btn-mute"
+        style="position: fixed; bottom: 20px; right: 20px; font-size: 20px; background: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; box-shadow: var(--shadow-md); z-index: 1000;">🔊</button>
     <div class="game-container">
         <h1 class="game-title">🎨 Color Match!</h1>
         <p class="question" id="question">What color is this fruit?</p>
@@ -112,29 +171,61 @@
             <div class="option" style="background: #FF0000;" onclick="checkAnswer('red')"></div>
             <div class="option" style="background: #FFFF00;" onclick="checkAnswer('yellow')"></div>
             <div class="option" style="background: #00FF00;" onclick="checkAnswer('green')"></div>
-            <div class="option" style="background: #0000FF;" onclick="checkAnswer('blue')"></div>
+            <div class="option" style="background: #FFA500;" onclick="checkAnswer('orange')"></div>
+            <div class="option" style="background: #800080;" onclick="checkAnswer('purple')"></div>
         </div>
 
         <div class="feedback" id="feedback"></div>
 
-        <button class="btn btn-primary back-btn" onclick="window.location.href='game-hub-3-5.html'">
-            ← Back to Games
-        </button>
     </div>
 
     <script src="js/audio-manager.js"></script>
     <script>
         const audioManager = new AudioManager();
+        audioManager.initBackgroundMusic();
 
-        const questions = [
+        document.getElementById('mute-toggle').addEventListener('click', () => {
+            audioManager.toggleMute();
+            audioManager.playSound('click');
+        });
+
+        const GAME_ID = 'color-match';
+
+        const allQuestions = [
             { fruit: '🍎', color: 'red', name: 'Apple' },
             { fruit: '🍌', color: 'yellow', name: 'Banana' },
-            { fruit: '🍇', color: 'blue', name: 'Grapes' },
+            { fruit: '🍇', color: 'purple', name: 'Grapes' },
             { fruit: '🍏', color: 'green', name: 'Green Apple' },
-            { fruit: '🍊', color: 'red', name: 'Orange' }
+            { fruit: '🍊', color: 'orange', name: 'Orange' },
+            { fruit: '🍓', color: 'red', name: 'Strawberry' },
+            { fruit: '🍋', color: 'yellow', name: 'Lemon' },
+            { fruit: '🥕', color: 'orange', name: 'Carrot' },
+            { fruit: '🍉', color: 'green', name: 'Watermelon' },
+            { fruit: '🍆', color: 'purple', name: 'Eggplant' }
         ];
 
+        let questions = [];
         let currentQuestion = 0;
+        let score = 0;
+        let totalAttempts = 0;
+        let correctCount = 0;
+
+        // Shuffle function
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // Initialize game with shuffled questions
+        function initGame() {
+            questions = shuffleArray(allQuestions);
+            currentQuestion = 0;
+            loadQuestion();
+        }
 
         function loadQuestion() {
             const q = questions[currentQuestion];
@@ -145,14 +236,29 @@
         function checkAnswer(color) {
             const q = questions[currentQuestion];
             const feedback = document.getElementById('feedback');
+            totalAttempts++;
 
             if (color === q.color) {
+                correctCount++;
+                score += 10;
                 feedback.textContent = `🎉 Yes! ${q.name} is ${color}!`;
                 feedback.className = 'feedback success show';
                 audioManager.playSound('correct');
 
                 setTimeout(() => {
+                    const wasLastQuestion = currentQuestion === questions.length - 1;
                     currentQuestion = (currentQuestion + 1) % questions.length;
+
+                    // Track progress
+                    if (window.saveGameProgress) {
+                        window.saveGameProgress(GAME_ID, {
+                            score: score,
+                            completed: wasLastQuestion,
+                            attempts: totalAttempts,
+                            correctAnswers: correctCount
+                        });
+                    }
+
                     loadQuestion();
                 }, 2000);
             } else {
@@ -164,8 +270,10 @@
             }
         }
 
-        loadQuestion();
+        // Initialize game on page load
+        initGame();
     </script>
+    <script type="module" src="js/progress-service.js"></script>
 </body>
 
 </html>

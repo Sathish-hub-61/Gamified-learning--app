@@ -21,13 +21,34 @@
             background: var(--white);
             border-radius: var(--radius-lg);
             padding: var(--spacing-lg);
-            margin-bottom: var(--spacing-lg);
+            margin: 20px 0 var(--spacing-lg) 0;
             box-shadow: var(--shadow-md);
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: var(--spacing-md);
+        }
+
+        .parents-portal-btn {
+            background: var(--white);
+            color: var(--primary-purple);
+            padding: 10px 20px;
+            border-radius: 100px;
+            font-weight: 700;
+            text-decoration: none;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .parents-portal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            background: var(--primary-purple);
+            color: white;
         }
 
         .header-left {
@@ -65,8 +86,9 @@
 
         .games-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: var(--spacing-lg);
+            width: 100%;
             max-width: 1200px;
             margin: 0 auto;
         }
@@ -135,48 +157,100 @@
         }
 
         @media (max-width: 768px) {
+            body {
+                padding: var(--spacing-sm);
+            }
+
+            .header {
+                margin-top: 20px;
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+
+            .header-left {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
             .games-grid {
                 grid-template-columns: 1fr;
+                gap: var(--spacing-md);
+            }
+
+            /* Make back button less obtrusive on small screens/zoom */
+            .back-link {
+                padding: 8px 16px;
+                font-size: 0.9rem;
             }
         }
     </style>
 </head>
 
 <body>
-    <a href="age-selection.html" class="back-link">← Back</a>
+    <a href="age-selection.html" class="back-link"
+        style="position: fixed; top: 20px; left: 20px; background: white; padding: 10px 20px; border-radius: 30px; text-decoration: none; color: #333; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 1000;">←
+        Back</a>
 
     <div class="header">
         <div class="header-left">
             <img src="assets/images/mascot.png" alt="Mascot" class="mascot-small">
             <div class="user-info">
                 <h2>Learning Hub</h2>
-                <p>Age 6-9 • Challenge yourself!</p>
+                <p>Challenge yourself!</p>
             </div>
         </div>
-        <div class="star-display">
-            ⭐ <span id="star-count">0</span>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="star-display">
+                ⭐ <span id="star-count">0</span>
+            </div>
+            <button onclick="window.location.href='parent-dashboard-6-9.html'" class="btn btn-secondary">
+                👨‍👩‍👧 Parents
+            </button>
         </div>
     </div>
 
     <div class="games-grid">
-        <!-- Math Quest -->
-        <div class="game-card slide-in-left" onclick="window.location.href='math-quest.html'">
+        <!-- Balance the Scale -->
+        <div class="game-card slide-in-left" onclick="window.location.href='balance-scale.html'">
             <div class="game-header">
-                <div class="game-icon">🔢</div>
-                <span class="game-badge">Math</span>
-                <h3 class="game-title">Math Quest</h3>
-                <p class="game-description">Solve addition and subtraction problems!</p>
+                <div class="game-icon">⚖️</div>
+                <span class="game-badge">Logic</span>
+                <h3 class="game-title">Balance the Scale</h3>
+                <p class="game-description">Learn equality by balancing numbers!</p>
             </div>
             <button class="btn btn-primary play-button">Play Now →</button>
         </div>
 
-        <!-- Word Wizard -->
-        <div class="game-card slide-in-right" onclick="window.location.href='word-wizard.html'">
+        <!-- Story Snap -->
+        <div class="game-card slide-in-right" onclick="window.location.href='story-snap.html'">
             <div class="game-header">
-                <div class="game-icon">📝</div>
-                <span class="game-badge">Language</span>
-                <h3 class="game-title">Word Wizard</h3>
-                <p class="game-description">Unscramble words and fill in missing letters!</p>
+                <div class="game-icon">📖</div>
+                <span class="game-badge">Reading</span>
+                <h3 class="game-title">Story Snap</h3>
+                <p class="game-description">Put story panels in the right order!</p>
+            </div>
+            <button class="btn btn-success play-button">Play Now →</button>
+        </div>
+
+        <!-- Pattern Detective -->
+        <div class="game-card slide-in-left" onclick="window.location.href='pattern-detective.html'">
+            <div class="game-header">
+                <div class="game-icon">🔍</div>
+                <span class="game-badge">Logic</span>
+                <h3 class="game-title">Pattern Detective</h3>
+                <p class="game-description">Find what comes next in patterns!</p>
+            </div>
+            <button class="btn btn-primary play-button">Play Now →</button>
+        </div>
+
+        <!-- Spot the Odd One -->
+        <div class="game-card slide-in-right" onclick="window.location.href='spot-odd-one.html'">
+            <div class="game-header">
+                <div class="game-icon">🎯</div>
+                <span class="game-badge">Thinking</span>
+                <h3 class="game-title">Spot the Odd One</h3>
+                <p class="game-description">Find which item doesn't belong!</p>
             </div>
             <button class="btn btn-success play-button">Play Now →</button>
         </div>
@@ -204,16 +278,44 @@
         </div>
     </div>
 
+    <button id="mute-toggle" class="btn-mute"
+        style="position: fixed; bottom: 20px; right: 20px; font-size: 24px; background: white; border: none; border-radius: 50%; width: 50px; height: 50px; cursor: pointer; box-shadow: var(--shadow-md); z-index: 1000;">🔊</button>
+
     <script src="js/progress-tracker.js"></script>
     <script src="js/audio-manager.js"></script>
-    <script>
-        const progressTracker = new ProgressTracker();
+    <script type="module">
+        import { getUserStats } from './js/progress-service.js';
+        import { auth } from './js/firebase-config.js';
+
+        // Initialize Audio (kept from original)
         const audioManager = new AudioManager();
+        audioManager.initBackgroundMusic();
 
-        // Update star count
-        document.getElementById('star-count').textContent = progressTracker.totalStars;
+        document.getElementById('mute-toggle').addEventListener('click', () => {
+            audioManager.toggleMute();
+            audioManager.playSound('click');
+        });
 
-        audioManager.initBackgroundMusic('forest');
+        // Load Real-time Stats
+        async function loadStats() {
+            try {
+                const stats = await getUserStats();
+                if (stats && stats.totalScore !== undefined) {
+                    document.getElementById('star-count').textContent = stats.totalScore;
+                }
+            } catch (e) {
+                console.log("Stats sync:", e);
+                // Fallback to local if offline, but ideally we wait for cloud
+                const local = localStorage.getItem('totalStars');
+                if (local) document.getElementById('star-count').textContent = local;
+            }
+        }
+
+        // Wait for auth then load
+        import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        onAuthStateChanged(auth, (user) => {
+            if (user) loadStats();
+        });
     </script>
 </body>
 

@@ -237,20 +237,53 @@
             left: 20px;
             background: white;
             border: none;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
+            border-radius: 12px;
+            padding: 12px 20px;
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 8px;
             cursor: pointer;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
             transition: all 0.3s;
-            z-index: 100;
+            z-index: 1000;
+            font-size: 16px;
+            font-weight: 700;
+            color: #333;
         }
 
         .back-button:hover {
-            transform: scale(1.1);
+            transform: translateY(-2px);
+            background: #FF69B4;
+            color: white;
+        }
+
+        .parents-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+            z-index: 1000;
+            font-size: 16px;
+            font-weight: 700;
+            color: #9370DB;
+            text-decoration: none;
+        }
+
+        .parents-button:hover {
+            transform: translateY(-2px);
+            background: #9370DB;
+            color: white;
         }
 
         @keyframes float {
@@ -307,6 +340,9 @@
     <button class="back-button" onclick="window.location.href='game-hub-3-5.html'">
         ← Back
     </button>
+    <a href="parent-dashboard-3-5.html" class="parents-button">
+        👨‍👩‍👧 Parents
+    </a>
 
     <div class="game-container">
         <div class="game-header">
@@ -363,7 +399,8 @@
     <script src="js/nlp-engine.js"></script>
     <script src="js/adaptive-learning-engine.js"></script>
     <script>
-        const rhymes = [
+        const GAME_ID = 'rhymes-game';
+        const allRhymes = [
             {
                 image: '🌟',
                 text: 'Twinkle, twinkle, little star,\nHow I wonder what you are!',
@@ -396,20 +433,55 @@
             }
         ];
 
+        // Shuffle function
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        let rhymes = shuffleArray(allRhymes); // Initialize with shuffled rhymes
         let currentRhymeIndex = 0;
         let nlpEngine = null;
         let adaptiveEngine = null;
         let hasPermission = false;
+        let totalScore = 0;
+        let rhymesAttempted = 0;
+        let rhymesCorrect = 0;
+
+        // Check if permission was already granted in this session
+        const pState = localStorage.getItem('micPermissionGranted');
+        if (pState === 'true') {
+            hasPermission = true;
+        }
 
         // Initialize engines
         function initializeEngines() {
-            nlpEngine = new NLPEngine();
-            adaptiveEngine = new AdaptiveLearningEngine();
-            adaptiveEngine.initialize('3-5');
+            try {
+                if (typeof NLPEngine !== 'undefined') {
+                    nlpEngine = new NLPEngine();
+                } else {
+                    console.log('NLPEngine not available - using fallback mode');
+                }
 
-            // Check if speech recognition is supported
-            if (!NLPEngine.isSupported()) {
-                console.log('Speech recognition not supported - using fallback mode');
+                if (typeof AdaptiveLearningEngine !== 'undefined') {
+                    adaptiveEngine = new AdaptiveLearningEngine();
+                    adaptiveEngine.initialize('3-5');
+                } else {
+                    console.log('AdaptiveLearningEngine not available - using fallback mode');
+                }
+
+                // Check if speech recognition is supported
+                if (!nlpEngine || (typeof NLPEngine !== 'undefined' && !NLPEngine.isSupported())) {
+                    console.log('Speech recognition not supported - using fallback mode');
+                    document.getElementById('listenBtn').textContent = '✓ Continue';
+                }
+            } catch (error) {
+                console.log('Engine initialization error:', error);
+                console.log('Using fallback mode');
                 document.getElementById('listenBtn').textContent = '✓ Continue';
             }
         }
@@ -422,6 +494,7 @@
 
                 if (hasPermission) {
                     console.log('✅ Microphone permission granted');
+                    localStorage.setItem('rhymes_mic_permission', 'granted');
                 } else {
                     console.log('❌ Microphone permission denied - using fallback');
                 }
@@ -471,13 +544,15 @@
             listenBtn.focus();
 
             // Record interaction
-            const startTime = Date.now();
-            adaptiveEngine.recordInteraction({
-                type: 'rhyme-listening',
-                correct: true,
-                timeSpent: Date.now() - startTime,
-                context: { rhyme: currentRhymeIndex }
-            });
+            if (adaptiveEngine) {
+                const startTime = Date.now();
+                adaptiveEngine.recordInteraction({
+                    type: 'rhyme-listening',
+                    correct: true,
+                    timeSpent: Date.now() - startTime,
+                    context: { rhyme: currentRhymeIndex }
+                });
+            }
         }
 
         // Listen for child participation
@@ -499,16 +574,18 @@
                     showFeedback(result);
 
                     // Record interaction
-                    adaptiveEngine.recordInteraction({
-                        type: 'rhyme-participation',
-                        correct: result.participated,
-                        timeSpent: Date.now() - startTime,
-                        context: {
-                            rhyme: currentRhymeIndex,
-                            quality: result.quality,
-                            method: result.method
-                        }
-                    });
+                    if (adaptiveEngine) {
+                        adaptiveEngine.recordInteraction({
+                            type: 'rhyme-participation',
+                            correct: result.participated,
+                            timeSpent: Date.now() - startTime,
+                            context: {
+                                rhyme: currentRhymeIndex,
+                                quality: result.quality,
+                                method: result.method
+                            }
+                        });
+                    }
 
                     document.getElementById('nextBtn').style.display = 'block';
                 });
@@ -518,12 +595,14 @@
                 listeningIndicator.classList.remove('active');
                 showFeedback({ participated: true, method: 'fallback', quality: 'participated' });
 
-                adaptiveEngine.recordInteraction({
-                    type: 'rhyme-participation',
-                    correct: true,
-                    timeSpent: Date.now() - startTime,
-                    context: { rhyme: currentRhymeIndex, method: 'fallback' }
-                });
+                if (adaptiveEngine) {
+                    adaptiveEngine.recordInteraction({
+                        type: 'rhyme-participation',
+                        correct: true,
+                        timeSpent: Date.now() - startTime,
+                        context: { rhyme: currentRhymeIndex, method: 'fallback' }
+                    });
+                }
 
                 document.getElementById('nextBtn').style.display = 'block';
             }
@@ -538,15 +617,33 @@
             let stars = '⭐';
             let message = 'Great job listening! 🎵';
             let className = 'participated';
+            let scoreIncrement = 10;
 
             if (result.quality === 'excellent') {
                 stars = '⭐⭐⭐';
                 message = 'Amazing! You know this rhyme! 🌟';
                 className = 'success';
+                scoreIncrement = 30;
             } else if (result.quality === 'good') {
                 stars = '⭐⭐';
                 message = 'Wonderful! Keep singing! 🎶';
                 className = 'success';
+                scoreIncrement = 20;
+            }
+
+            totalScore += scoreIncrement;
+            rhymesAttempted++;
+            if (result.participated) rhymesCorrect++;
+
+            // Save progress
+            const wasLast = currentRhymeIndex === rhymes.length - 1;
+            if (window.saveGameProgress) {
+                window.saveGameProgress(GAME_ID, {
+                    score: totalScore,
+                    completed: wasLast,
+                    attempts: rhymesAttempted,
+                    correctAnswers: rhymesCorrect
+                });
             }
 
             feedbackStars.textContent = stars;
@@ -561,6 +658,9 @@
         function nextRhyme() {
             currentRhymeIndex++;
             if (currentRhymeIndex >= rhymes.length) {
+                // Reshuffle rhymes for next round
+                rhymes = shuffleArray(allRhymes);
+                currentRhymeIndex = 0;
                 showCompletionModal();
             } else {
                 loadRhyme();
@@ -574,9 +674,32 @@
         }
 
         // Show completion modal
-        function showCompletionModal() {
-            const analytics = adaptiveEngine.getSessionAnalytics();
-            alert(`🎉 Amazing! You completed all rhymes!\n\nYou sang ${rhymes.length} rhymes!\nSuccess rate: ${(analytics.successRate * 100).toFixed(0)}%\n\nKeep singing! 🎵`);
+        async function showCompletionModal() {
+            let successRate = 100;
+            if (adaptiveEngine) {
+                const analytics = adaptiveEngine.getSessionAnalytics();
+                successRate = (analytics.successRate * 100).toFixed(0);
+            }
+
+            // Save Progress to Cloud
+            if (window.saveGameProgress) {
+                await window.saveGameProgress('rhymes-game', {
+                    score: 100, // Fixed score for completion
+                    completed: true,
+                    correctAnswers: rhymes.length,
+                    attempts: rhymes.length
+                });
+            }
+
+            if (window.saveSession) {
+                await window.saveSession({
+                    duration: Math.floor((Date.now() - sessionStartTime) / 1000),
+                    gamesPlayed: ['rhymes-game'],
+                    totalScore: 100
+                });
+            }
+
+            alert(`🎉 Amazing! You completed all rhymes!\n\nYou sang ${rhymes.length} rhymes!\nSuccess rate: ${successRate}%\n\nKeep singing! 🎵`);
             window.location.href = 'game-hub-3-5.html';
         }
 
@@ -585,8 +708,14 @@
             return new Promise((resolve) => {
                 if ('speechSynthesis' in window) {
                     const utterance = new SpeechSynthesisUtterance(text);
-                    utterance.rate = 0.8;
-                    utterance.pitch = 1.2;
+                    utterance.rate = 0.9;
+                    utterance.pitch = 1.1;
+
+                    // Try to find a clear, friendly voice
+                    const voices = speechSynthesis.getVoices();
+                    const preferredVoice = voices.find(v => v.name.includes('Google') || v.name.includes('Female') || v.lang.includes('en-GB'));
+                    if (preferredVoice) utterance.voice = preferredVoice;
+
                     utterance.onend = resolve;
                     speechSynthesis.speak(utterance);
                 } else {
@@ -623,14 +752,18 @@
             initializeEngines();
             loadRhyme();
 
-            // Show permission modal if needed
-            if (NLPEngine.isSupported()) {
+            // Show permission modal if needed and not already granted
+            const savedPermission = localStorage.getItem('rhymes_mic_permission');
+            if (NLPEngine.isSupported() && savedPermission !== 'granted') {
                 setTimeout(() => {
                     document.getElementById('permissionModal').classList.add('active');
                 }, 1000);
+            } else if (savedPermission === 'granted') {
+                hasPermission = true;
             }
         });
     </script>
+    <script type="module" src="js/progress-service.js"></script>
 </body>
 
 </html>

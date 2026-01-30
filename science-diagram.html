@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Science Diagram - Gamified Learning</title>
+    <!-- Use the same font as the rest of the app -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Use FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --secondary: #ec4899;
+            --background: #f8fafc;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            min-height: 100vh;
+            color: #1e293b;
+        }
+
+        .game-header {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid #e2e8f0;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .main-lab {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 2rem;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            height: calc(100vh - 80px);
+        }
+
+        /* Sidebar Parts Panel */
+        .parts-panel {
+            background: #fff;
+            border-radius: 24px;
+            padding: 1.5rem;
+            border: 2px solid #cbd5e1;
+            box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .panel-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .parts-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+
+        .part-tag {
+            background: #fff;
+            border: 2px solid #e2e8f0;
+            padding: 12px 16px;
+            border-radius: 16px;
+            cursor: grab;
+            font-weight: 600;
+            color: #334155;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            user-select: none;
+        }
+
+        .part-tag:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1);
+        }
+
+        .part-tag.placed {
+            opacity: 0.5;
+            background: #f1f5f9;
+            cursor: default;
+            pointer-events: none;
+            text-decoration: line-through;
+        }
+
+        /* Drawing Area */
+        .specimen-card {
+            background: #fff;
+            border-radius: 32px;
+            border: 1px solid #e2e8f0;
+            position: relative;
+            /* Enforce aspect ratio to match SVG coordinates */
+            aspect-ratio: 4/3;
+            width: 100%;
+            max-width: 800px;
+            max-height: 80vh;
+            margin: 0 auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .flower-svg {
+            height: 100%;
+            width: 100%;
+            pointer-events: none;
+            /* Prevents SVG paths from stealing drop events */
+        }
+
+        /* Mapping Drop Zones */
+        .mapping-point {
+            position: absolute;
+            min-width: 130px;
+            padding: 10px 15px;
+            border: 2px dashed #94a3b8;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #64748b;
+            font-size: 0.9rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translate(-50%, -50%);
+            z-index: 100;
+            pointer-events: auto;
+            text-align: center;
+        }
+
+        .mapping-point.hover {
+            border-color: var(--primary);
+            border-style: solid;
+            background: #eef2ff;
+            transform: translate(-50%, -50%) scale(1.1);
+            box-shadow: 0 20px 25px -5px rgba(79, 70, 229, 0.2);
+            color: var(--primary);
+            cursor: pointer;
+        }
+
+        .drop-hint {
+            pointer-events: none;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        .part-tag.dragging {
+            opacity: 0.5;
+            transform: scale(0.95);
+            background: #f1f5f9;
+        }
+
+        .part-tag.selected {
+            border-color: var(--primary);
+            background: #e0e7ff;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.2);
+            transform: scale(1.05);
+        }
+
+        .mapping-point.correct {
+            border: 3px solid #22c55e;
+            background: #f0fdf4;
+            color: #15803d;
+            box-shadow: 0 10px 15px -3px rgba(34, 197, 94, 0.2);
+            pointer-events: none;
+        }
+
+        .mapping-point.wrong-shake {
+            animation: shake 0.4s ease-in-out;
+            border-color: #ef4444 !important;
+            background: #fef2f2 !important;
+            color: #b91c1c !important;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translate(-50%, -50%);
+            }
+
+            20%,
+            60% {
+                transform: translate(-55%, -50%);
+            }
+
+            40%,
+            80% {
+                transform: translate(-45%, -50%);
+            }
+        }
+
+        #diagram-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Win Overlay */
+        .win-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .star-badge {
+            font-size: 1.5rem;
+            background: #fffbeb;
+            color: #d97706;
+            padding: 0.5rem 1rem;
+            border-radius: 99px;
+            border: 2px solid #fcd34d;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        #next-level-btn {
+            display: none;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 900px) {
+            .main-lab {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+
+            .parts-panel {
+                height: 300px;
+            }
+
+            .specimen-card {
+                height: 500px;
+                /* Fallback for mobile */
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Dependencies -->
+    <script src="js/progress-tracker.js"></script>
+
+    <script>
+        const audio = {
+            click: new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3'),
+            correct: new Audio('https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3'),
+            wrong: new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3'),
+            win: new Audio('https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3'),
+            toggleMute: function () {
+                // simple mute logic for now
+                this.muted = !this.muted;
+                Object.values(this).forEach(a => a instanceof Audio && (a.muted = this.muted));
+                document.getElementById('sound-icon').className = this.muted ? 'fas fa-volume-mute' : 'fas fa-volume-up';
+            }
+        };
+
+        // Initialize Tracker (Robust Check)
+        let tracker;
+        try {
+            if (typeof ProgressTracker !== 'undefined') {
+                tracker = new ProgressTracker();
+            } else {
+                throw new Error('Tracker script not loaded');
+            }
+        } catch (e) {
+            console.warn('ProgressTracker not found, using mock.', e);
+            tracker = {
+                addStars: (n) => console.log('Stars added (mock):', n),
+                completeGame: (id, score, max) => console.log('Game Complete (mock):', id, score, max)
+            };
+        }
+    </script>
+
+    <header class="game-header">
+        <div class="container d-flex justify-content-between align-items-center">
+            <a href="game-hub.html" class="btn btn-outline-secondary rounded-pill">
+                <i class="fas fa-arrow-left me-2"></i>Back
+            </a>
+            <h2 class="h4 mb-0 fw-bold text-primary" id="level-title">SPECIMEN 1/3: FLOWER ANATOMY</h2>
+            <div class="d-flex gap-3 align-items-center">
+                <div class="star-badge">
+                    <i class="fas fa-star"></i>
+                    <span id="stars">0</span>
+                </div>
+                <button class="btn btn-light rounded-circle shadow-sm" onclick="audio.toggleMute()">
+                    <i id="sound-icon" class="fas fa-volume-up text-secondary"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-lab">
+        <aside class="parts-panel">
+            <div class="panel-title">
+                <i class="fas fa-puzzle-piece"></i> Parts Tray
+            </div>
+            <div class="parts-grid" id="tag-container">
+                <!-- Tags injected by JS -->
+            </div>
+
+            <button id="next-level-btn" class="btn btn-success w-100 py-3 rounded-xl fw-bold"
+                onclick="window.nextLevel()">
+                NEXT SPECIMEN &rarr;
+            </button>
+        </aside>
+
+        <section class="specimen-card">
+            <div id="diagram-container" style="width: 100%; height: 100%;">
+                <!-- SVG Injected Here -->
+            </div>
+
+            <div id="overlay" class="win-overlay">
+                <div class="text-center">
+                    <div style="font-size: 5rem; margin-bottom: 1rem;">🏆</div>
+                    <h2 class="fw-bold mb-3">Research Complete!</h2>
+                    <p class="text-secondary mb-4">You have documented all specimens!</p>
+                    <div class="display-4 fw-bold text-primary mb-4" id="final-score">0</div>
+                    <a href="game-hub.html" class="btn btn-primary btn-lg rounded-pill px-5">
+                        Return to Lab
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Init sounds
+        document.body.addEventListener('click', () => {
+            if (audio.click.paused) audio.click.play().catch(() => { });
+        }, { once: true });
+
+        document.querySelectorAll('.btn').forEach(b => b.addEventListener('mouseenter', () => {
+            // hover sound optional
+        }));
+        document.querySelectorAll('.btn').forEach(b => b.addEventListener('click', () => {
+            audio.toggleMute(); // dummy
+            audio.playSound('click');
+        }));
+
+        const levels = [
+            {
+                id: 'flower',
+                title: 'FLOWER ANATOMY',
+                tags: [
+                    { id: 'stigma', label: '🌸 Stigma', fact: "The sticky top that catches pollen!" },
+                    { id: 'style', label: '💈 Style', fact: "The tube that pollen travels down." },
+                    { id: 'ovary', label: '🥚 Ovary', fact: "Contains ovules and becomes the fruit." },
+                    { id: 'ovule', label: '💎 Ovule', fact: "Turns into a seed after fertilization." },
+                    { id: 'anther', label: '📦 Anther', fact: "The part that produces pollen." },
+                    { id: 'filament', label: '🦯 Filament', fact: "Stalk that holds up the anther." },
+                    { id: 'petal', label: '🎀 Petal', fact: "Attracts pollinators with bright colors!" },
+                    { id: 'sepal', label: '🍃 Sepal', fact: "Protects the flower while it's a bud." },
+                    { id: 'receptacle', label: '🥗 Receptacle', fact: "The base where flower parts are attached." },
+                    { id: 'root', label: '🥕 Root', fact: "Absorbs water and anchors the plant." }
+                ],
+                svg: `
+                    <svg class="flower-svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet">
+                        <defs>
+                            <linearGradient id="petalGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#fb7185"/><stop offset="100%" stop-color="#db2777"/>
+                            </linearGradient>
+                            <linearGradient id="leafGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#4ade80"/><stop offset="100%" stop-color="#15803d"/>
+                            </linearGradient>
+                        </defs>
+                        <g transform="translate(400, 50)">
+                            <!-- Roots -->
+                            <path d="M0,420 c-20,30 -50,50 -60,100 M0,420 c20,30 50,50 60,100 M0,420 v120" stroke="#92400e" stroke-width="6" fill="none" stroke-linecap="round"/>
+                            
+                            <!-- Stem -->
+                            <rect x="-8" y="320" width="16" height="100" fill="url(#leafGrad)" />
+                            
+                            <!-- Receptacle -->
+                            <path d="M-40,320 q40,40 80,0 q-10,-30 -70,-30 Z" fill="#166534" stroke="#064e3b" />
+
+                            <!-- Sepals -->
+                            <path d="M-40,320 q-60,-20 -80,-80 q40,60 80,80" fill="#22c55e" stroke="#14532d" />
+                            <path d="M40,320 q60,-20 80,-80 q-40,60 -80,80" fill="#22c55e" stroke="#14532d" />
+
+                            <!-- Petals (Richly Layered) -->
+                            <path d="M-30,300 q-150,-50 -130,-220 q80,40 130,220" fill="url(#petalGrad)" opacity="0.9" />
+                            <path d="M30,300 q150,-50 130,-220 q-80,40 -130,220" fill="url(#petalGrad)" opacity="0.9" />
+                            <path d="M0,300 q-80,-280 0,-300 q80,20 0,300" fill="#fbcfe8" stroke="#db2777" />
+
+                            <!-- Pistil (Stigma + Style + Ovary) -->
+                            <path d="M0,310 q-45,0 -45,-45 q0,-45 45,-45 q45,0 45,45 q0,45 -45,45" fill="#ecfdf5" stroke="#059669" stroke-width="2" /> <!-- Ovary -->
+                            <rect x="-4" y="50" width="8" height="170" fill="#34d399" /> <!-- Style -->
+                            <ellipse cx="0" cy="45" rx="18" ry="12" fill="#fbbf24" stroke="#d97706" stroke-width="2" /> <!-- Stigma -->
+                            <circle cx="0" cy="265" r="8" fill="#d1fae5" stroke="#059669" /> <!-- Ovule -->
+
+                            <!-- Stamen (Anthers + Filaments) -->
+                            <path d="M-30,280 q-80,-80 -60,-180" stroke="#fcd34d" stroke-width="3" fill="none" />
+                            <rect x="-105" y="85" width="20" height="10" rx="5" fill="#d97706" transform="rotate(-30 -95 90)" />
+                            <path d="M30,280 q80,-80 60,-180" stroke="#fcd34d" stroke-width="3" fill="none" />
+                            <rect x="85" y="85" width="20" height="10" rx="5" fill="#d97706" transform="rotate(30 95 90)" />
+
+                            <!-- Precise Leader Lines -->
+                            <g stroke="#94a3b8" stroke-width="2" stroke-dasharray="5,5">
+                                <line x1="-15" y1="45" x2="-180" y2="45" /> <!-- Stigma -->
+                                <line x1="5" y1="120" x2="220" y2="120" /> <!-- Style -->
+                                <line x1="-100" y1="90" x2="-220" y2="150" /> <!-- Anther -->
+                                <line x1="-70" y1="180" x2="-200" y2="220" /> <!-- Filament -->
+                                <line x1="120" y1="180" x2="250" y2="180" /> <!-- Petal -->
+                                <line x1="40" y1="265" x2="240" y2="265" /> <!-- Ovary -->
+                                <line x1="5" y1="265" x2="160" y2="340" /> <!-- Ovule -->
+                                <line x1="-110" y1="260" x2="-250" y2="300" /> <!-- Sepal -->
+                                <line x1="40" y1="310" x2="200" y2="420" /> <!-- Receptacle -->
+                                <line x1="0" y1="480" x2="-180" y2="480" /> <!-- Root -->
+                            </g>
+                        </g>
+                    </svg>
+                `,
+                zones: [
+                    { id: 'stigma', x: 220, y: 95 },
+                    { id: 'style', x: 620, y: 170 },
+                    { id: 'anther', x: 180, y: 200 },
+                    { id: 'filament', x: 200, y: 270 },
+                    { id: 'petal', x: 650, y: 230 },
+                    { id: 'ovary', x: 640, y: 315 },
+                    { id: 'ovule', x: 560, y: 390 },
+                    { id: 'sepal', x: 150, y: 350 },
+                    { id: 'receptacle', x: 600, y: 470 },
+                    { id: 'root', x: 220, y: 530 }
+                ]
+            },
+            {
+                id: 'leaf',
+                title: 'LEAF STRUCTURE',
+                tags: [
+                    { id: 'blade', label: '🍃 Blade', fact: "The broad, flat part that catches sunlight!" },
+                    { id: 'vein', label: '🌿 Vein', fact: "Tiny pipes that carry water around the leaf." },
+                    { id: 'midrib', label: '📏 Midrib', fact: "The central vein that keeps the leaf strong." },
+                    { id: 'petiole', label: '🪵 Petiole', fact: "The small stalk that joins the leaf to the stem." }
+                ],
+                svg: `
+                    <svg class="flower-svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet">
+                        <defs>
+                           <linearGradient id="leafGrad" x1="0" y1="0" x2="0" y2="1">
+                               <stop offset="0%" stop-color="#4ade80"/><stop offset="100%" stop-color="#16a34a"/>
+                           </linearGradient>
+                        </defs>
+                        <g transform="translate(400, 300)">
+                            <path d="M0,150 L0,250" stroke="#65a30d" stroke-width="14" stroke-linecap="round"/>
+                            <path d="M0,150 Q-200,50 -180,-150 Q0,-280 180,-150 Q200,50 0,150 Z" fill="url(#leafGrad)" stroke="#14532d" stroke-width="4"/>
+                            <path d="M0,150 L0,-220" stroke="#14532d" stroke-width="6" opacity="0.5"/>
+                            <g stroke="#14532d" stroke-width="3" opacity="0.4">
+                                <path d="M0,80 L-120,20"/><path d="M0,80 L120,20"/>
+                                <path d="M0,-30 L-140,-120"/><path d="M0,-30 L140,-120"/>
+                            </g>
+                            <g stroke="#94a3b8" stroke-width="2" stroke-dasharray="4,4">
+                                <line x1="130" y1="-80" x2="280" y2="-80"/>
+                                <line x1="0" y1="-180" x2="-220" y2="-180"/>
+                                <line x1="-90" y1="35" x2="-250" y2="100"/>
+                                <line x1="0" y1="200" x2="180" y2="220"/>
+                            </g>
+                            <g fill="#1e293b">
+                                <circle cx="130" cy="-80" r="5"/><circle cx="0" cy="-180" r="5"/><circle cx="-90" cy="35" r="5"/><circle cx="0" cy="200" r="5"/>
+                            </g>
+                        </g>
+                    </svg>
+                `,
+                zones: [
+                    { id: 'blade', x: 680, y: 220 }, { id: 'midrib', x: 180, y: 120 },
+                    { id: 'vein', x: 150, y: 400 }, { id: 'petiole', x: 580, y: 520 }
+                ]
+            },
+            {
+                id: 'cell',
+                title: 'PLANT CELL',
+                tags: [
+                    { id: 'wall', label: '🧱 Cell Wall', fact: "A tough outer layer that protects the plant!" },
+                    { id: 'nucleus', label: '🟣 Nucleus', fact: "The brain of the cell that tells it what to do." },
+                    { id: 'vacuole', label: '💧 Vacuole', fact: "A big storage bubble for water and food." },
+                    { id: 'chloroplast', label: '🌱 Chloroplast', fact: "Makes food using sunlight (Photosynthesis)!" }
+                ],
+                svg: `
+                    <svg class="flower-svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet">
+                        <g transform="translate(150, 60)">
+                            <rect x="0" y="0" width="500" height="400" rx="50" fill="#ecfccb" stroke="#365314" stroke-width="12"/>
+                            <rect x="25" y="25" width="450" height="350" rx="35" fill="#f7fee7" stroke="#84cc16" stroke-width="5"/>
+                            <!-- Vacuole -->
+                            <path d="M150,80 Q400,30 420,200 Q400,340 250,340 Q80,330 150,80" fill="#e0f2fe" stroke="#38bdf8" stroke-width="3" opacity="0.9"/>
+                            <!-- Nucleus -->
+                            <circle cx="120" cy="280" r="50" fill="#e879f9" stroke="#a21caf" stroke-width="4"/>
+                            <circle cx="120" cy="280" r="18" fill="#a21caf"/>
+                            <!-- Chloroplasts -->
+                            <g fill="#22c55e" stroke="#14532d" stroke-width="2">
+                                <ellipse cx="380" cy="100" rx="35" ry="18" transform="rotate(25 380 100)"/>
+                                <ellipse cx="400" cy="320" rx="35" ry="18" transform="rotate(-15 400 320)"/>
+                                <ellipse cx="250" cy="65" rx="35" ry="18"/>
+                            </g>
+                            <!-- Leader Lines -->
+                            <g stroke="#94a3b8" stroke-width="2" stroke-dasharray="4,4">
+                                <line x1="0" y1="200" x2="-80" y2="200"/>
+                                <line x1="120" y1="330" x2="120" y2="440"/>
+                                <line x1="300" y1="200" x2="520" y2="200"/>
+                                <line x1="380" y1="100" x2="550" y2="50"/>
+                            </g>
+                            <g fill="#1e293b">
+                                <circle cx="0" cy="200" r="5"/><circle cx="120" cy="330" r="5"/>
+                                <circle cx="300" cy="200" r="5"/><circle cx="380" cy="100" r="5"/>
+                            </g>
+                        </g>
+                    </svg>
+                `,
+                zones: [
+                    { id: 'wall', x: 70, y: 260 }, { id: 'nucleus', x: 270, y: 500 },
+                    { id: 'vacuole', x: 670, y: 260 }, { id: 'chloroplast', x: 700, y: 110 }
+                ]
+            }
+        ];
+
+        let currentLevelIdx = 0;
+        let starScore = 0;
+        let levelPlaced = 0;
+
+        // Global state to store dragging info (more reliable than dataTransfer in some browsers)
+        const GlobalDragState = {
+            tagId: null,
+            partId: null
+        };
+
+        let selectedTagId = null;
+        let selectedPartId = null;
+
+        function loadLevel(idx) {
+            currentLevelIdx = idx;
+            const level = levels[idx];
+            levelPlaced = 0;
+
+            // Update Header
+            document.getElementById('level-title').textContent = `SPECIMEN ${idx + 1}/${levels.length}: ${level.title}`;
+
+            // Render SVG
+            document.getElementById('diagram-container').innerHTML = level.svg;
+
+            // Render Tags
+            const tagContainer = document.getElementById('tag-container');
+            tagContainer.innerHTML = '';
+            level.tags.forEach(tag => {
+                const el = document.createElement('div');
+                el.className = 'part-tag';
+                el.id = `tag-${tag.id}`;
+                el.draggable = true;
+                el.dataset.partId = tag.id;
+                el.textContent = tag.label;
+
+                // Click interaction
+                el.onclick = () => selectTag(tag.id, el.id);
+
+                // Drag and Drop interaction
+                el.addEventListener('dragstart', (e) => {
+                    GlobalDragState.tagId = el.id;
+                    GlobalDragState.partId = tag.id;
+
+                    // Also use standard dataTransfer for broad support
+                    e.dataTransfer.setData('text/plain', `${el.id}|${tag.id}`);
+                    e.dataTransfer.effectAllowed = 'move';
+                    el.classList.add('dragging');
+
+                    // If a tag was previously 'selected' by click, clear it
+                    document.querySelectorAll('.part-tag').forEach(t => t.classList.remove('selected'));
+                    selectedTagId = null;
+                    selectedPartId = null;
+                });
+
+                el.addEventListener('dragend', () => {
+                    el.classList.remove('dragging');
+                    // Clear global drag state if drag ends without a drop on a valid target
+                    if (GlobalDragState.tagId !== null) {
+                        GlobalDragState.tagId = null;
+                        GlobalDragState.partId = null;
+                    }
+                });
+
+                tagContainer.appendChild(el);
+            });
+
+            // Render Drop Zones (Mathematically Precisely positioned)
+            level.zones.forEach(zone => {
+                const el = document.createElement('div');
+                el.className = 'mapping-point';
+                el.id = `point-${zone.id}`;
+                el.dataset.part = zone.id;
+                el.innerHTML = '<span class="drop-hint">DROP</span>';
+
+                // Interaction Handlers
+                el.onclick = () => dropAtZone(zone.id, el.id);
+
+                el.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    if (!el.classList.contains('correct')) el.classList.add('hover');
+                });
+
+                el.addEventListener('dragleave', () => el.classList.remove('hover'));
+
+                el.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    el.classList.remove('hover');
+
+                    let droppedTagId, droppedPartId;
+
+                    // 1. Try standard dataTransfer
+                    const rawData = e.dataTransfer.getData('text/plain');
+                    if (rawData && rawData.includes('|')) {
+                        [droppedTagId, droppedPartId] = rawData.split('|');
+                    }
+
+                    // 2. Fallback to GlobalDragState (most reliable)
+                    droppedTagId = droppedTagId || GlobalDragState.tagId;
+                    droppedPartId = droppedPartId || GlobalDragState.partId;
+
+                    // 3. Final fallback to Click selection state (if drag was initiated by click and then dragged)
+                    droppedTagId = droppedTagId || selectedTagId;
+                    droppedPartId = droppedPartId || selectedPartId;
+
+                    if (droppedPartId) {
+                        dropAtZone(zone.id, el.id, droppedPartId, droppedTagId);
+                    }
+
+                    // Reset global drag state after a successful drop or an attempted drop
+                    GlobalDragState.tagId = null;
+                    GlobalDragState.partId = null;
+                });
+
+                // Calculate percentage from SVG-unit coordinates
+                el.style.top = `${(zone.y / 600) * 100}%`;
+                el.style.left = `${(zone.x / 800) * 100}%`;
+                document.getElementById('diagram-container').appendChild(el);
+            });
+        }
+
+        function selectTag(partId, elementId) {
+            const el = document.getElementById(elementId);
+            if (el.classList.contains('placed')) return;
+
+            // Clear previous selection
+            document.querySelectorAll('.part-tag').forEach(t => t.classList.remove('selected'));
+
+            if (selectedTagId === elementId) {
+                selectedTagId = null;
+                selectedPartId = null;
+            } else {
+                selectedTagId = elementId;
+                selectedPartId = partId;
+                el.classList.add('selected');
+                audio.playSound('click');
+            }
+        }
+
+        function dropAtZone(targetId, zoneElementId, partId = selectedPartId, tagId = selectedTagId) {
+            if (!partId) return;
+
+            const point = document.getElementById(zoneElementId);
+            if (point.classList.contains('correct')) return;
+
+            if (partId === targetId) {
+                audio.playSound('correct');
+
+                const level = levels[currentLevelIdx];
+                const tagData = level.tags.find(t => t.id === partId);
+
+                point.innerHTML = `<strong>${tagData.label}</strong><div style="font-weight:400; font-size: 0.75rem; color: #15803d; margin-top:4px; line-height:1.2;">${tagData.fact}</div>`;
+                point.classList.add('correct');
+                point.style.minWidth = "200px";
+
+                const tagEl = document.getElementById(tagId);
+                if (tagEl) {
+                    tagEl.classList.add('placed');
+                    tagEl.classList.remove('selected');
+                    tagEl.classList.remove('dragging');
+                    tagEl.draggable = false;
+                }
+
+                selectedTagId = null;
+                selectedPartId = null;
+
+                levelPlaced++;
+                starScore += 25;
+                document.getElementById('stars').textContent = starScore;
+
+                if (levelPlaced === level.tags.length) {
+                    audio.playSound('win');
+                    if (currentLevelIdx < levels.length - 1) {
+                        const btn = document.getElementById('next-level-btn');
+                        btn.style.display = 'block';
+                        btn.textContent = `NEXT: ${levels[currentLevelIdx + 1].title} →`;
+                    } else {
+                        finishGame();
+                    }
+                }
+            } else {
+                audio.playSound('wrong');
+                point.classList.add('wrong-shake');
+                setTimeout(() => point.classList.remove('wrong-shake'), 400);
+            }
+        }
+
+        window.nextLevel = function () {
+            loadLevel(currentLevelIdx + 1);
+        }
+
+        async function finishGame() {
+            setTimeout(async () => {
+                document.getElementById('overlay').style.display = 'flex';
+                document.getElementById('final-score').textContent = starScore;
+
+                // Track if available
+                if (tracker) {
+                    tracker.addStars(starScore);
+                    tracker.completeGame('science-diagram', starScore, 100);
+                }
+
+                if (window.saveGameProgress) {
+                    await window.saveGameProgress('science-diagram', {
+                        score: starScore,
+                        completed: true,
+                        correctAnswers: levels.reduce((acc, l) => acc + l.tags.length, 0),
+                        attempts: levels.reduce((acc, l) => acc + l.tags.length, 0)
+                    });
+                }
+            }, 500);
+        }
+
+        // Init
+        loadLevel(0);
+
+    </script>
+    <script type="module" src="js/progress-service.js"></script>
+</body>
+
+</html>

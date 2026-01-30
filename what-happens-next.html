@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What Happens Next? - PlayLearn</title>
+    <link rel="stylesheet" href="css/global.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 32px;
+            padding: 40px;
+            max-width: 650px;
+            width: 100%;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            position: relative;
+        }
+
+        .situation-box {
+            background: #f8fafc;
+            border-radius: 20px;
+            padding: 35px;
+            margin-bottom: 30px;
+            border: 3px dashed #667eea;
+            position: relative;
+        }
+
+        .situation-box::before {
+            content: '🧐 Situation:';
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .situation-text {
+            font-size: 1.6rem;
+            color: #1e293b;
+            font-weight: 700;
+            line-height: 1.4;
+        }
+
+        .choices-container {
+            display: grid;
+            gap: 15px;
+        }
+
+        .choice-btn {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 20px 25px;
+            font-size: 1.2rem;
+            color: #334155;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-weight: 600;
+        }
+
+        .choice-btn:hover {
+            border-color: #667eea;
+            background: #f1f5f9;
+            transform: scale(1.02) translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.1);
+        }
+
+        .choice-btn.active {
+            border-color: #667eea;
+            background: #eef2ff;
+        }
+
+        .choice-btn-letter {
+            background: #f1f5f9;
+            color: #64748b;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .feedback-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .feedback-content {
+            background: white;
+            padding: 45px;
+            border-radius: 32px;
+            text-align: center;
+            max-width: 450px;
+            width: 90%;
+            animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0.3);
+                opacity: 0;
+            }
+
+            50% {
+                transform: scale(1.05);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .feedback-icon {
+            font-size: 5rem;
+            margin-bottom: 25px;
+            display: block;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            align-items: center;
+        }
+
+        .progress-bar {
+            flex-grow: 1;
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 10px;
+            margin: 0 20px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .score-badge {
+            background: #f1f5f9;
+            color: #667eea;
+            padding: 8px 18px;
+            border-radius: 15px;
+            font-weight: 800;
+            font-size: 1.1rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .back-to-hub {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 2rem;
+            text-decoration: none;
+            cursor: pointer;
+            z-index: 10;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="game-hub.html" class="back-to-hub">🏠</a>
+    <button id="mute-toggle" class="btn-mute"
+        style="position: fixed; bottom: 20px; right: 20px; font-size: 20px; background: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; box-shadow: var(--shadow-md); z-index: 1000;">🔊</button>
+
+    <div class="game-container">
+        <div id="game-ui">
+            <div class="progress-header">
+                <div class="score-badge">⭐ <span id="star-count">0</span></div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <div class="score-badge" id="step-indicator">1/5</div>
+            </div>
+
+            <div class="situation-box">
+                <p class="situation-text" id="situation-text">A seed is planted in soil and watered regularly.</p>
+            </div>
+
+            <h3 style="margin-bottom: 25px; color: #475569; font-size: 1.3rem;">What happens next? 🤔</h3>
+
+            <div class="choices-container" id="choices-container">
+                <!-- Choice buttons injected here -->
+            </div>
+        </div>
+
+        <div id="completion-ui" style="display: none;">
+            <div class="feedback-icon">🏆</div>
+            <h1 style="font-size: 2.5rem; color: #1e293b; margin-bottom: 10px;">Master Predictor!</h1>
+            <p style="font-size: 1.3rem; color: #64748b; margin-bottom: 30px;">You understand the world's logic
+                perfectly!</p>
+            <div style="font-size: 3rem; font-weight: 900; color: #667eea; margin-bottom: 40px;">
+                ⭐ <span id="final-stars">0</span>
+            </div>
+            <button class="btn btn-primary" style="padding: 15px 40px; font-size: 1.2rem;"
+                onclick="window.location.href='game-hub.html'">Done!</button>
+        </div>
+    </div>
+
+    <div class="feedback-overlay" id="feedback-overlay">
+        <div class="feedback-content">
+            <div class="feedback-icon" id="feedback-icon">✅</div>
+            <h2 id="feedback-title" style="font-size: 2rem; margin-bottom: 15px;">Correct!</h2>
+            <p id="feedback-text" style="font-size: 1.2rem; color: #475569; margin-bottom: 30px; line-height: 1.6;"></p>
+            <button class="btn btn-primary" style="width: 100%; padding: 15px;" onclick="nextQuestion()">Next Scenario
+                →</button>
+        </div>
+    </div>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="js/progress-service.js"></script>
+    <script src="js/progress-tracker.js"></script>
+    <script src="js/audio-manager.js"></script>
+
+    <script>
+        const GAME_ID = 'what-happens-next';
+        const scenarios = [
+            {
+                situation: "A seed is planted in soil and watered regularly.",
+                choices: [
+                    { text: "It turns into stone", correct: false },
+                    { text: "It starts growing roots", correct: true, feedback: "Seeds need water and soil to start growing into plants!" },
+                    { text: "It disappears", correct: false }
+                ]
+            },
+            {
+                situation: "A glass of water is kept in the freezer for many hours.",
+                choices: [
+                    { text: "Water becomes ice", correct: true, feedback: "Freezing temperatures turn liquid water into solid ice!" },
+                    { text: "Water boils", correct: false },
+                    { text: "Glass melts", correct: false }
+                ]
+            },
+            {
+                situation: "A magnet is brought near iron nails.",
+                choices: [
+                    { text: "Nails move away", correct: false },
+                    { text: "Nails stick to the magnet", correct: true, feedback: "Magnets pull on things made of iron like nails!" },
+                    { text: "Nails change color", correct: false }
+                ]
+            },
+            {
+                situation: "Dark clouds gather and the air feels moist.",
+                choices: [
+                    { text: "The sun gets brighter", correct: false },
+                    { text: "It starts raining", correct: true, feedback: "Dark clouds mean the water droplets have gathered to fall as rain!" },
+                    { text: "Birds start singing louder", correct: false }
+                ]
+            },
+            {
+                situation: "A balloon is poked with a sharp needle.",
+                choices: [
+                    { text: "The balloon grows bigger", correct: false },
+                    { text: "The balloon pops loudly", correct: true, feedback: "The sharp needle breaks the surface, releasing all the air at once!" },
+                    { text: "The needle bounces off", correct: false }
+                ]
+            }
+        ];
+
+        let currentStep = 0;
+        let score = 0;
+        const tracker = new ProgressTracker();
+        const audio = new AudioManager();
+        audio.initBackgroundMusic();
+
+        document.getElementById('mute-toggle').addEventListener('click', () => {
+            audio.toggleMute();
+            audio.playSound('click');
+        });
+
+        function initGame() {
+            loadScenario();
+            updateStats();
+        }
+
+        function loadScenario() {
+            const data = scenarios[currentStep];
+            document.getElementById('situation-text').textContent = data.situation;
+            document.getElementById('step-indicator').textContent = `${currentStep + 1}/${scenarios.length}`;
+            document.getElementById('progress-fill').style.width = `${((currentStep) / scenarios.length) * 100}%`;
+
+            const container = document.getElementById('choices-container');
+            container.innerHTML = '';
+
+            data.choices.forEach((choice, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'choice-btn';
+                btn.innerHTML = `
+                    <div class="choice-btn-letter">${String.fromCharCode(65 + index)}</div>
+                    <div class="choice-btn-text">${choice.text}</div>
+                `;
+                btn.onclick = () => handleChoice(choice);
+                container.appendChild(btn);
+            });
+        }
+
+        function handleChoice(choice) {
+            const overlay = document.getElementById('feedback-overlay');
+            const icon = document.getElementById('feedback-icon');
+            const title = document.getElementById('feedback-title');
+            const text = document.getElementById('feedback-text');
+
+            if (choice.correct) {
+                audio.playSound('correct');
+                score += 20;
+                icon.textContent = '✅';
+                title.textContent = 'Well Done!';
+                text.textContent = choice.feedback;
+                updateStats();
+            } else {
+                audio.playSound('wrong');
+                icon.textContent = '❌';
+                title.textContent = 'Not Quite!';
+                text.textContent = "Think about what usually happens next in the real world.";
+            }
+            overlay.style.display = 'flex';
+        }
+
+        function nextQuestion() {
+            document.getElementById('feedback-overlay').style.display = 'none';
+            currentStep++;
+            if (currentStep < scenarios.length) {
+                loadScenario();
+            } else {
+                showCompletion();
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('star-count').textContent = score;
+        }
+
+        function showCompletion() {
+            document.getElementById('game-ui').style.display = 'none';
+            document.getElementById('completion-ui').style.display = 'block';
+            document.getElementById('final-stars').textContent = score;
+            tracker.completeGame(GAME_ID, score, 100);
+            tracker.addStars(score);
+
+            if (window.saveGameProgress) {
+                window.saveGameProgress(GAME_ID, {
+                    score: score,
+                    completed: true,
+                    correctAnswers: score / 20, // 20 stars per correct answer
+                    attempts: scenarios.length
+                });
+            }
+        }
+
+        window.onload = initGame;
+    </script>
+    <script type="module" src="js/progress-service.js"></script>
+</body>
+
+</html>

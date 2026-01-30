@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Connection Test - PlayLearn</title>
+    <link rel="stylesheet" href="css/global.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .test-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .status-box {
+            background: #f5f7fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+
+        .status-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .status-item:last-child {
+            border-bottom: none;
+        }
+
+        .success {
+            color: #4CAF50;
+        }
+
+        .error {
+            color: #f44336;
+        }
+
+        .pending {
+            color: #ff9800;
+        }
+
+        .test-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .test-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .data-display {
+            background: #f5f7fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="test-container">
+        <h1>🔥 Firebase Connection Test</h1>
+
+        <div class="status-box" id="statusBox">
+            <div class="status-item pending" id="status1">⏳ Initializing Firebase...</div>
+            <div class="status-item pending" id="status2">⏳ Testing Authentication...</div>
+            <div class="status-item pending" id="status3">⏳ Testing Firestore...</div>
+            <div class="status-item pending" id="status4">⏳ Testing Progress Service...</div>
+        </div>
+
+        <button class="test-button" id="testButton" onclick="runTests()">Run Tests</button>
+
+        <div class="data-display" id="dataDisplay" style="display: none;">
+            <h3>Test Results:</h3>
+            <pre id="resultsData"></pre>
+        </div>
+
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="index.html" class="btn btn-secondary">← Back to Home</a>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth, db } from './js/firebase-config.js';
+        import { signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { collection, addDoc, getDocs, deleteDoc, doc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { saveGameProgress, getAllProgress } from './js/progress-service.js';
+
+        window.runTests = async function () {
+            const button = document.getElementById('testButton');
+            button.disabled = true;
+            button.textContent = 'Running Tests...';
+
+            const results = {
+                firebase: false,
+                auth: false,
+                firestore: false,
+                progressService: false,
+                userId: null,
+                testData: {}
+            };
+
+            try {
+                // Test 1: Firebase Initialization
+                updateStatus('status1', 'pending', '⏳ Testing Firebase initialization...');
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                if (auth && db) {
+                    updateStatus('status1', 'success', '✅ Firebase initialized successfully');
+                    results.firebase = true;
+                } else {
+                    throw new Error('Firebase not initialized');
+                }
+
+                // Test 2: Authentication
+                updateStatus('status2', 'pending', '⏳ Testing authentication...');
+                const userCredential = await signInAnonymously(auth);
+                results.userId = userCredential.user.uid;
+                updateStatus('status2', 'success', `✅ Authentication successful (User: ${results.userId.substring(0, 8)}...)`);
+                results.auth = true;
+
+                // Test 3: Firestore Write/Read
+                updateStatus('status3', 'pending', '⏳ Testing Firestore database...');
+
+                // Write test
+                const testRef = await addDoc(collection(db, 'test'), {
+                    message: 'Firebase test successful!',
+                    timestamp: new Date(),
+                    userId: results.userId
+                });
+
+                // Read test
+                const testSnapshot = await getDocs(collection(db, 'test'));
+                const testCount = testSnapshot.size;
+
+                // Cleanup
+                await deleteDoc(doc(db, 'test', testRef.id));
+
+                updateStatus('status3', 'success', `✅ Firestore working (${testCount} test documents)`);
+                results.firestore = true;
+                results.testData.firestoreDocId = testRef.id;
+
+                // Test 4: Progress Service
+                updateStatus('status4', 'pending', '⏳ Testing Progress Service...');
+
+                const testProgress = await saveGameProgress('test-game', {
+                    score: 100,
+                    level: 5,
+                    completed: true,
+                    attempts: 10,
+                    correctAnswers: 8,
+                    wrongAnswers: 2,
+                    timeSpent: 300,
+                    metadata: { test: true }
+                });
+
+                if (testProgress.success) {
+                    const allProgress = await getAllProgress();
+                    updateStatus('status4', 'success', `✅ Progress Service working (${Object.keys(allProgress.progress || {}).length} games tracked)`);
+                    results.progressService = true;
+                    results.testData.progressSaved = testProgress.data;
+                } else {
+                    throw new Error('Progress service failed');
+                }
+
+                // Display results
+                displayResults(results);
+                button.textContent = '✅ All Tests Passed!';
+                button.style.background = 'linear-gradient(135deg, #4CAF50, #8BC34A)';
+
+            } catch (error) {
+                console.error('Test error:', error);
+                updateStatus('status1', 'error', '❌ Test failed: ' + error.message);
+                button.textContent = '❌ Tests Failed';
+                button.style.background = 'linear-gradient(135deg, #f44336, #e91e63)';
+
+                results.error = error.message;
+                displayResults(results);
+            }
+
+            button.disabled = false;
+        };
+
+        function updateStatus(id, type, message) {
+            const element = document.getElementById(id);
+            element.className = `status-item ${type}`;
+            element.textContent = message;
+        }
+
+        function displayResults(results) {
+            const display = document.getElementById('dataDisplay');
+            const resultsData = document.getElementById('resultsData');
+
+            display.style.display = 'block';
+            resultsData.textContent = JSON.stringify(results, null, 2);
+        }
+
+        // Auto-run tests on load (optional)
+        // window.addEventListener('load', () => {
+        //     setTimeout(runTests, 1000);
+        // });
+    </script>
+</body>
+
+</html>

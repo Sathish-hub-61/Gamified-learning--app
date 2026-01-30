@@ -402,6 +402,8 @@
     <button class="back-button" onclick="window.location.href='game-hub-6-9.html'">
         ← Back
     </button>
+    <button id="mute-toggle" class="btn-mute"
+        style="position: fixed; bottom: 20px; right: 20px; font-size: 20px; background: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; box-shadow: var(--shadow-md); z-index: 1000;">🔊</button>
 
     <div class="game-container">
         <div class="game-header">
@@ -511,7 +513,19 @@
         </div>
     </div>
 
+    <script src="js/firebase-config.js"></script>
+    <script src="js/progress-service.js"></script>
+    <script src="js/audio-manager.js"></script>
     <script>
+        const audioManager = new AudioManager();
+        audioManager.initBackgroundMusic();
+
+        document.getElementById('mute-toggle').addEventListener('click', () => {
+            audioManager.toggleMute();
+            audioManager.playSound('click');
+        });
+
+        const GAME_ID = 'drag-drop-math';
         let score = 0;
         let solved = 0;
         let totalAttempts = 0;
@@ -577,7 +591,7 @@
 
             if (draggedAnswer === correctAnswer) {
                 // Correct answer
-                playSound('success');
+                audioManager.playSound('correct');
                 this.classList.add('correct');
                 draggedElement.classList.add('used');
 
@@ -597,7 +611,7 @@
                 }
             } else {
                 // Incorrect answer
-                playSound('error');
+                audioManager.playSound('wrong');
                 this.classList.add('incorrect');
                 setTimeout(() => {
                     this.classList.remove('incorrect');
@@ -616,9 +630,17 @@
             document.getElementById('finalScore').textContent = score;
             document.getElementById('finalAttempts').textContent = totalAttempts;
             document.getElementById('completionModal').classList.add('active');
-            playSound('complete');
+            audioManager.playSound('success');
 
             // Save progress
+            if (window.saveGameProgress) {
+                window.saveGameProgress(GAME_ID, {
+                    score: score,
+                    completed: true,
+                    attempts: totalAttempts,
+                    correctAnswers: solved
+                });
+            }
             saveProgress();
         }
 
@@ -679,24 +701,40 @@
             }
         }
 
-        function saveProgress() {
+        async function saveProgress() {
             const progress = {
-                game: 'math-operations',
+                game: 'drag-drop-math',
                 score: score,
                 attempts: totalAttempts,
                 completed: true,
                 timestamp: new Date().toISOString()
             };
 
+            // Local storage backup
             let allProgress = JSON.parse(localStorage.getItem('gameProgress') || '[]');
             allProgress.push(progress);
             localStorage.setItem('gameProgress', JSON.stringify(allProgress));
 
-            let stats = JSON.parse(localStorage.getItem('userStats') || '{"stars": 0, "badges": 0}');
-            stats.stars += 3;
-            localStorage.setItem('userStats', JSON.stringify(stats));
+            // Cloud Sync
+            if (window.saveGameProgress) {
+                await window.saveGameProgress('drag-drop-math', {
+                    score: score,
+                    completed: true,
+                    correctAnswers: score / 10,
+                    attempts: totalAttempts
+                });
+            }
+
+            if (window.saveSession) {
+                await window.saveSession({
+                    duration: Math.floor((Date.now() - sessionStartTime) / 1000),
+                    gamesPlayed: ['drag-drop-math'],
+                    totalScore: score
+                });
+            }
         }
     </script>
+    <script type="module" src="js/progress-service.js"></script>
 </body>
 
 </html>

@@ -23,6 +23,7 @@
             background: white;
             border-radius: 20px;
             padding: 20px;
+            margin-top: 80px;
             margin-bottom: 30px;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
             display: flex;
@@ -296,20 +297,53 @@
             left: 20px;
             background: white;
             border: none;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
+            border-radius: 12px;
+            padding: 12px 20px;
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 8px;
             cursor: pointer;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
             transition: all 0.3s;
-            z-index: 100;
+            z-index: 1000;
+            font-size: 16px;
+            font-weight: 700;
+            color: #333;
         }
 
         .back-button:hover {
-            transform: scale(1.1);
+            transform: translateY(-2px);
+            background: var(--primary-purple);
+            color: white;
+        }
+
+        .parents-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+            z-index: 1000;
+            font-size: 16px;
+            font-weight: 700;
+            color: #9370DB;
+            text-decoration: none;
+        }
+
+        .parents-button:hover {
+            transform: translateY(-2px);
+            background: #9370DB;
+            color: white;
         }
 
         @keyframes successPulse {
@@ -367,9 +401,14 @@
 </head>
 
 <body>
-    <button class="back-button" onclick="window.location.href='hub-3-5.html'">
+    <button class="back-button" onclick="window.location.href='game-hub-3-5.html'">
         ← Back
     </button>
+    <a href="parent-dashboard-3-5.html" class="parents-button">
+        👨‍👩‍👧 Parents
+    </a>
+    <button id="mute-toggle" class="btn-mute"
+        style="position: fixed; bottom: 20px; right: 20px; font-size: 20px; background: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; box-shadow: var(--shadow-md); z-index: 1000;">🔊</button>
 
     <div class="game-container">
         <div class="game-header">
@@ -383,7 +422,7 @@
                     <div class="score-label">Score</div>
                 </div>
                 <div class="score-item">
-                    <div class="score-value" id="matchedValue">0/6</div>
+                    <div class="score-value" id="matchedValue">0/8</div>
                     <div class="score-label">Matched</div>
                 </div>
             </div>
@@ -397,30 +436,7 @@
             <div class="draggable-section">
                 <div class="section-title">🎨 Colors</div>
                 <div class="color-items" id="colorItems">
-                    <div class="color-item" draggable="true" data-color="red"
-                        style="background: linear-gradient(135deg, #ff6b6b, #ee5a6f);">
-                        Red
-                    </div>
-                    <div class="color-item" draggable="true" data-color="blue"
-                        style="background: linear-gradient(135deg, #4dabf7, #339af0);">
-                        Blue
-                    </div>
-                    <div class="color-item" draggable="true" data-color="yellow"
-                        style="background: linear-gradient(135deg, #ffd43b, #fab005);">
-                        Yellow
-                    </div>
-                    <div class="color-item" draggable="true" data-color="green"
-                        style="background: linear-gradient(135deg, #51cf66, #37b24d);">
-                        Green
-                    </div>
-                    <div class="color-item" draggable="true" data-color="orange"
-                        style="background: linear-gradient(135deg, #ff922b, #fd7e14);">
-                        Orange
-                    </div>
-                    <div class="color-item" draggable="true" data-color="purple"
-                        style="background: linear-gradient(135deg, #b197fc, #9775fa);">
-                        Purple
-                    </div>
+                    <!-- Colors will be dynamically generated and shuffled -->
                 </div>
             </div>
 
@@ -451,6 +467,14 @@
                         <div class="object-image">🍇</div>
                         <div class="object-label">Grapes</div>
                     </div>
+                    <div class="drop-zone" data-color="pink">
+                        <div class="object-image">🌸</div>
+                        <div class="object-label">Flower</div>
+                    </div>
+                    <div class="drop-zone" data-color="brown">
+                        <div class="object-image">🐻</div>
+                        <div class="object-label">Bear</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -473,32 +497,80 @@
             </div>
             <div class="modal-buttons">
                 <button class="btn btn-primary" onclick="resetGame()">🔄 Play Again</button>
-                <button class="btn btn-secondary" onclick="window.location.href='hub-3-5.html'">🏠 Back to Hub</button>
+                <button class="btn btn-secondary" onclick="window.location.href='game-hub-3-5.html'">🏠 Back to
+                    Hub</button>
             </div>
         </div>
     </div>
 
+    <script src="js/audio-manager.js"></script>
     <script>
+        const audioManager = new AudioManager();
+        audioManager.initBackgroundMusic();
+
+        document.getElementById('mute-toggle').addEventListener('click', () => {
+            audioManager.toggleMute();
+            audioManager.playSound('click');
+        });
+
+        const GAME_ID = 'drag-drop-colors';
+
         let score = 0;
         let matched = 0;
         let totalAttempts = 0;
         let draggedElement = null;
 
-        const colorItems = document.querySelectorAll('.color-item');
-        const dropZones = document.querySelectorAll('.drop-zone');
+        // Color data with gradients
+        const colors = [
+            { name: 'red', label: 'Red', gradient: 'linear-gradient(135deg, #ff6b6b, #ee5a6f)' },
+            { name: 'blue', label: 'Blue', gradient: 'linear-gradient(135deg, #4dabf7, #339af0)' },
+            { name: 'yellow', label: 'Yellow', gradient: 'linear-gradient(135deg, #ffd43b, #fab005)' },
+            { name: 'green', label: 'Green', gradient: 'linear-gradient(135deg, #51cf66, #37b24d)' },
+            { name: 'orange', label: 'Orange', gradient: 'linear-gradient(135deg, #ff922b, #fd7e14)' },
+            { name: 'purple', label: 'Purple', gradient: 'linear-gradient(135deg, #b197fc, #9775fa)' },
+            { name: 'pink', label: 'Pink', gradient: 'linear-gradient(135deg, #ff6ec7, #ff49db)' },
+            { name: 'brown', label: 'Brown', gradient: 'linear-gradient(135deg, #8b4513, #a0522d)' }
+        ];
 
-        // Drag events for color items
-        colorItems.forEach(item => {
-            item.addEventListener('dragstart', handleDragStart);
-            item.addEventListener('dragend', handleDragEnd);
-        });
+        // Shuffle array function
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
 
-        // Drop events for drop zones
-        dropZones.forEach(zone => {
-            zone.addEventListener('dragover', handleDragOver);
-            zone.addEventListener('dragleave', handleDragLeave);
-            zone.addEventListener('drop', handleDrop);
-        });
+        // Initialize game
+        function initializeGame() {
+            const colorItemsContainer = document.getElementById('colorItems');
+            const shuffledColors = shuffleArray(colors);
+
+            // Generate color items in random order
+            shuffledColors.forEach(color => {
+                const colorItem = document.createElement('div');
+                colorItem.className = 'color-item';
+                colorItem.draggable = true;
+                colorItem.setAttribute('data-color', color.name);
+                colorItem.style.background = color.gradient;
+                colorItem.textContent = color.label;
+
+                // Add drag events
+                colorItem.addEventListener('dragstart', handleDragStart);
+                colorItem.addEventListener('dragend', handleDragEnd);
+
+                colorItemsContainer.appendChild(colorItem);
+            });
+
+            // Setup drop zones
+            const dropZones = document.querySelectorAll('.drop-zone');
+            dropZones.forEach(zone => {
+                zone.addEventListener('dragover', handleDragOver);
+                zone.addEventListener('dragleave', handleDragLeave);
+                zone.addEventListener('drop', handleDrop);
+            });
+        }
 
         function handleDragStart(e) {
             if (this.classList.contains('matched')) return;
@@ -544,7 +616,7 @@
 
             if (draggedColor === targetColor) {
                 // Correct match
-                playSound('success');
+                audioManager.playSound('correct');
                 this.classList.add('correct');
                 draggedElement.classList.add('matched');
 
@@ -559,12 +631,21 @@
                 updateScore();
 
                 // Check if game is complete
-                if (matched === 6) {
+                if (matched === 8) {
                     setTimeout(showCompletionModal, 500);
+                }
+
+                if (window.saveGameProgress) {
+                    window.saveGameProgress(GAME_ID, {
+                        score: score,
+                        completed: matched === 8,
+                        attempts: totalAttempts,
+                        correctAnswers: matched
+                    });
                 }
             } else {
                 // Incorrect match
-                playSound('error');
+                audioManager.playSound('wrong');
                 this.classList.add('incorrect');
                 setTimeout(() => {
                     this.classList.remove('incorrect');
@@ -576,14 +657,14 @@
 
         function updateScore() {
             document.getElementById('scoreValue').textContent = score;
-            document.getElementById('matchedValue').textContent = `${matched}/6`;
+            document.getElementById('matchedValue').textContent = `${matched}/8`;
         }
 
         function showCompletionModal() {
             document.getElementById('finalScore').textContent = score;
             document.getElementById('finalAttempts').textContent = totalAttempts;
             document.getElementById('completionModal').classList.add('active');
-            playSound('complete');
+            audioManager.playSound('success');
 
             // Save progress
             saveProgress();
@@ -595,11 +676,28 @@
             totalAttempts = 0;
             updateScore();
 
-            // Reset all items
-            colorItems.forEach(item => {
-                item.classList.remove('matched');
+            // Clear and regenerate items
+            const colorItemsContainer = document.getElementById('colorItems');
+            colorItemsContainer.innerHTML = '';
+
+            // Reinitialize with shuffled colors
+            const shuffledColors = shuffleArray(colors);
+            shuffledColors.forEach(color => {
+                const colorItem = document.createElement('div');
+                colorItem.className = 'color-item';
+                colorItem.draggable = true;
+                colorItem.setAttribute('data-color', color.name);
+                colorItem.style.background = color.gradient;
+                colorItem.textContent = color.label;
+
+                colorItem.addEventListener('dragstart', handleDragStart);
+                colorItem.addEventListener('dragend', handleDragEnd);
+
+                colorItemsContainer.appendChild(colorItem);
             });
 
+            // Reset drop zones
+            const dropZones = document.querySelectorAll('.drop-zone');
             dropZones.forEach(zone => {
                 zone.classList.remove('correct', 'incorrect');
                 const droppedColor = zone.querySelector('.dropped-color');
@@ -648,26 +746,46 @@
             }
         }
 
-        function saveProgress() {
+        async function saveProgress() {
             const progress = {
-                game: 'color-match',
+                game: 'drag-drop-colors',
                 score: score,
                 attempts: totalAttempts,
                 completed: true,
                 timestamp: new Date().toISOString()
             };
 
-            // Get existing progress
+            // Local storage backup
             let allProgress = JSON.parse(localStorage.getItem('gameProgress') || '[]');
             allProgress.push(progress);
             localStorage.setItem('gameProgress', JSON.stringify(allProgress));
 
-            // Update stats
-            let stats = JSON.parse(localStorage.getItem('userStats') || '{"stars": 0, "badges": 0}');
-            stats.stars += 3;
-            localStorage.setItem('userStats', JSON.stringify(stats));
+            // Cloud Sync
+            if (window.saveGameProgress) {
+                await window.saveGameProgress('drag-drop-colors', {
+                    score: score,
+                    completed: true,
+                    correctAnswers: score / 10,
+                    attempts: totalAttempts
+                });
+            }
+
+            if (window.saveSession) {
+                await window.saveSession({
+                    duration: Math.floor((Date.now() - sessionStartTime) / 1000),
+                    gamesPlayed: ['drag-drop-colors'],
+                    totalScore: score
+                });
+            }
         }
+
+        window.resetGame = resetGame;
+        window.initializeGame = initializeGame;
+
+        // Initialize game on page load
+        initializeGame();
     </script>
+    <script type="module" src="js/progress-service.js"></script>
 </body>
 
 </html>

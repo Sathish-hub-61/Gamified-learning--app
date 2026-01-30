@@ -21,13 +21,34 @@
             background: var(--white);
             border-radius: var(--radius-lg);
             padding: var(--spacing-lg);
-            margin-bottom: var(--spacing-lg);
+            margin: 20px 0 var(--spacing-lg) 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
             box-shadow: var(--shadow-md);
             flex-wrap: wrap;
             gap: var(--spacing-md);
+        }
+
+        .parents-portal-btn {
+            background: var(--white);
+            color: var(--primary-purple);
+            padding: 10px 20px;
+            border-radius: 100px;
+            font-weight: 700;
+            text-decoration: none;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .parents-portal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            background: var(--primary-purple);
+            color: white;
         }
 
         .header-left {
@@ -107,8 +128,9 @@
 
         .games-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: var(--spacing-lg);
+            width: 100%;
             margin-bottom: var(--spacing-lg);
         }
 
@@ -124,12 +146,6 @@
         .game-card:hover {
             transform: translateY(-10px);
             box-shadow: var(--shadow-lg);
-        }
-
-        .game-image {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
         }
 
         .game-content {
@@ -185,51 +201,67 @@
             width: 100%;
         }
 
-        .bottom-nav {
+        .back-link {
+            position: fixed;
+            top: var(--spacing-md);
+            left: var(--spacing-md);
             background: var(--white);
-            border-radius: var(--radius-lg);
-            padding: var(--spacing-md);
-            display: flex;
-            justify-content: space-around;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--radius-full);
+            text-decoration: none;
+            color: var(--neutral-dark);
+            font-weight: 600;
             box-shadow: var(--shadow-md);
-        }
-
-        .nav-button {
-            background: none;
-            border: none;
-            color: var(--neutral-medium);
-            font-size: var(--font-size-sm);
-            cursor: pointer;
-            padding: var(--spacing-sm);
+            z-index: 1000;
             transition: all var(--transition-fast);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: var(--spacing-xs);
         }
 
-        .nav-button:hover {
-            color: var(--primary-purple);
-        }
-
-        .nav-icon {
-            font-size: var(--font-size-xl);
+        .back-link:hover {
+            transform: translateX(-5px);
+            box-shadow: var(--shadow-lg);
+            background: var(--primary-purple);
+            color: var(--white);
         }
 
         @media (max-width: 768px) {
+            body {
+                padding: var(--spacing-sm);
+            }
+
             .games-grid {
                 grid-template-columns: 1fr;
+                gap: var(--spacing-md);
             }
 
             .header {
                 flex-direction: column;
                 text-align: center;
+                margin-top: 20px;
+                padding: var(--spacing-md);
+            }
+
+            .header-left,
+            .header-right {
+                flex-direction: column;
+                gap: 10px;
+                width: 100%;
+            }
+
+            .mute-toggle {
+                margin: 0 auto;
+            }
+
+            /* Ensure buttons stack nicely */
+            .header-right button {
+                width: 100%;
+                margin: 5px 0 !important;
             }
         }
     </style>
 </head>
 
 <body>
+    <a href="age-selection.html" class="back-link">← Back</a>
     <div class="header">
         <div class="header-left">
             <img src="assets/images/mascot.png" alt="Mascot" class="mascot-small">
@@ -242,41 +274,63 @@
             <div class="star-display">
                 ⭐ <span id="star-count">0</span>
             </div>
+            <button onclick="window.location.href='parent-dashboard-10-12.html'" class="btn btn-secondary"
+                style="margin-right: 10px;">
+                👨‍👩‍👧 Parents
+            </button>
             <button id="mute-toggle" class="mute-toggle" aria-label="Toggle sound">
                 🔊
             </button>
         </div>
     </div>
 
-    <div class="main-content">
-        <div class="welcome-section fade-in">
-            <h1>Choose Your Adventure!</h1>
-            <p>Each game teaches important skills while you play. Have fun! 🎮</p>
-        </div>
 
+    <div class="main-content">
         <div class="games-grid">
-            <!-- Eco Hero Quest -->
-            <div class="game-card slide-in-left" onclick="startGame('eco-hero-quest')">
-                <img src="assets/images/eco-positive.png" alt="Eco Hero Quest" class="game-image">
+            <!-- Game 1: What Happens Next? -->
+            <div class="game-card slide-in-left" onclick="startGame('what-happens-next')">
                 <div class="game-content">
-                    <span class="game-badge">🌍 Environmental</span>
-                    <h3 class="game-title">Eco Hero Quest</h3>
+                    <span class="game-badge" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        🧠 Curiosity
+                    </span>
+                    <h3 class="game-title">What Happens Next?</h3>
                     <p class="game-description">
-                        Make choices that help our planet! Learn about saving water, reducing waste, and protecting
-                        nature.
+                        Predict outcomes based on real-world logic! Master cause and effect through fun scenarios.
                     </p>
                     <div class="game-stats">
                         <div class="stat">
-                            <div class="stat-value" id="eco-progress">0%</div>
-                            <div class="stat-label">Progress</div>
+                            <div class="stat-value">15</div>
+                            <div class="stat-label">Scenarios</div>
                         </div>
                         <div class="stat">
-                            <div class="stat-value" id="eco-stars">0</div>
-                            <div class="stat-label">Stars</div>
+                            <div class="stat-value">⭐</div>
+                            <div class="stat-label">Logic</div>
                         </div>
+                    </div>
+                    <button class="btn btn-primary play-button">
+                        Play Now →
+                    </button>
+                </div>
+            </div>
+
+            <!-- Game 2: GK Quiz -->
+            <div class="game-card slide-in-right" onclick="startGame('gk-quiz')">
+                <div class="game-content">
+                    <span class="game-badge" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                        🌍 Knowledge
+                    </span>
+                    <h3 class="game-title">GK Quiz Challenge</h3>
+                    <p class="game-description">
+                        Test your knowledge of the world! Presidents, capitals, inventions, and famous symbols.
+                    </p>
+                    <div class="game-stats">
                         <div class="stat">
                             <div class="stat-value">10</div>
-                            <div class="stat-label">Levels</div>
+                            <div class="stat-label">Questions</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">🏆</div>
+                            <div class="stat-label">Quiz</div>
                         </div>
                     </div>
                     <button class="btn btn-success play-button">
@@ -285,126 +339,145 @@
                 </div>
             </div>
 
-            <!-- Safety Shield Adventure -->
-            <div class="game-card slide-in-right" onclick="startGame('safety-shield')">
-                <img src="assets/images/safety-badge.png" alt="Safety Shield Adventure" class="game-image">
+            <!-- Game 3: Science Diagram -->
+            <div class="game-card slide-in-left" onclick="startGame('science-diagram')">
                 <div class="game-content">
-                    <span class="game-badge" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                        🛡️ Personal Safety
+                    <span class="game-badge" style="background: linear-gradient(135deg, #FF6B6B 0%, #FFD93D 100%);">
+                        🌸 Science
                     </span>
-                    <h3 class="game-title">Safety Shield Adventure</h3>
+                    <h3 class="game-title">Science Diagram</h3>
                     <p class="game-description">
-                        Build your safety shield! Learn to recognize safe situations and trusted adults.
+                        Label the parts of a flower! Learn biological structures through interactive drag-and-drop.
                     </p>
                     <div class="game-stats">
                         <div class="stat">
-                            <div class="stat-value" id="safety-progress">0%</div>
-                            <div class="stat-label">Progress</div>
+                            <div class="stat-value">1</div>
+                            <div class="stat-label">Diagram</div>
                         </div>
                         <div class="stat">
-                            <div class="stat-value" id="safety-stars">0</div>
-                            <div class="stat-label">Stars</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-value">10</div>
-                            <div class="stat-label">Levels</div>
+                            <div class="stat-value">🔬</div>
+                            <div class="stat-label">Biology</div>
                         </div>
                     </div>
-                    <button class="btn btn-primary play-button">
+                    <button class="btn btn-primary play-button" onclick="startGame('science-diagram')">
+                        Play Now →
+                    </button>
+                </div>
+            </div>
+
+            <!-- Pattern Vault -->
+            <div class="game-card slide-in-right" onclick="startGame('pattern-vault')">
+                <div class="game-content">
+                    <span class="game-badge" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        🔢 Logic
+                    </span>
+                    <h3 class="game-title">Pattern Vault</h3>
+                    <p class="game-description">
+                        Crack the vault by identifying number patterns! Develop sequences and logical reasoning skills.
+                    </p>
+                    <div class="game-stats">
+                        <div class="stat">
+                            <div class="stat-value">5</div>
+                            <div class="stat-label">Locks</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">⭐</div>
+                            <div class="stat-label">New</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-success play-button">
+                        Play Now →
+                    </button>
+                </div>
+            </div>
+
+            <!-- Body Quest -->
+            <div class="game-card slide-in-left" onclick="startGame('body-quest')">
+                <div class="game-content">
+                    <span class="game-badge" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                        🫀 Biology
+                    </span>
+                    <h3 class="game-title">Body Quest</h3>
+                    <p class="game-description">
+                        Navigate inside the human body! Learn about organs and make healthy choices to solve problems.
+                    </p>
+                    <div class="game-stats">
+                        <div class="stat">
+                            <div class="stat-value">5</div>
+                            <div class="stat-label">Organs</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">⭐</div>
+                            <div class="stat-label">New</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary play-button" onclick="startGame('body-quest')">
                         Play Now →
                     </button>
                 </div>
             </div>
         </div>
-
-        <div class="bottom-nav">
-            <button class="nav-button" onclick="window.location.href='game-hub.html'">
-                <span class="nav-icon">🎮</span>
-                <span>Games</span>
-            </button>
-            <button class="nav-button" onclick="showBadges()">
-                <span class="nav-icon">🏆</span>
-                <span>Badges</span>
-            </button>
-            <button class="nav-button" onclick="window.location.href='parent-dashboard.html'">
-                <span class="nav-icon">👨‍👩‍👧</span>
-                <span>Parents</span>
-            </button>
-        </div>
     </div>
 
-    <!-- Scripts -->
     <script src="js/progress-tracker.js"></script>
     <script src="js/audio-manager.js"></script>
+    <script type="module" src="js/progress-service.js"></script>
     <script>
-        // Initialize managers
-        const progressTracker = new ProgressTracker();
+        // Game Logic (Standard Script - Works immediately/offline)
         const audioManager = new AudioManager();
 
-        // Update UI with saved progress
-        function updateUI() {
-            document.getElementById('star-count').textContent = progressTracker.totalStars;
-
-            const gameData = progressTracker.getGameData();
-
-            // Update eco game stats
-            const ecoGame = gameData.find(g => g.id === 'eco-hero-quest');
-            if (ecoGame) {
-                document.getElementById('eco-progress').textContent = ecoGame.accuracy + '%';
-                document.getElementById('eco-stars').textContent = ecoGame.score;
-            }
-
-            // Update safety game stats
-            const safetyGame = gameData.find(g => g.id === 'safety-shield');
-            if (safetyGame) {
-                document.getElementById('safety-progress').textContent = safetyGame.accuracy + '%';
-                document.getElementById('safety-stars').textContent = safetyGame.score;
-            }
-        }
-
-        // Start game
         function startGame(gameId) {
-            audioManager.playSound('click');
+            // Try to play sound, but don't block navigation
+            try { audioManager.playSound('click'); } catch (e) { }
 
-            if (gameId === 'eco-hero-quest') {
-                window.location.href = 'eco-hero-quest.html';
-            } else if (gameId === 'safety-shield') {
-                window.location.href = 'safety-shield.html';
+            const gameUrls = {
+                'what-happens-next': 'what-happens-next.html',
+                'gk-quiz': 'gk-quiz.html',
+                'science-diagram': 'science-diagram.html',
+                'pattern-vault': 'pattern-vault.html',
+                'body-quest': 'body-quest.html'
+            };
+
+            if (gameUrls[gameId]) {
+                setTimeout(() => {
+                    window.location.href = gameUrls[gameId];
+                }, 100); // Slight delay for sound
             }
         }
 
-        // Show badges modal
-        function showBadges() {
-            const badges = progressTracker.badges;
-
-            let badgeHTML = '<div class="modal-badges">';
-            if (badges.length === 0) {
-                badgeHTML += '<p>Complete games to earn badges!</p>';
-            } else {
-                badges.forEach(badge => {
-                    badgeHTML += `
-                        <div class="badge-item">
-                            <div class="badge-icon-large">${badge.icon}</div>
-                            <div class="badge-name">${badge.name}</div>
-                        </div>
-                    `;
-                });
-            }
-            badgeHTML += '</div>';
-
-            alert('Badges:\n\n' + badges.map(b => `${b.icon} ${b.name}`).join('\n') || 'No badges yet! Keep playing!');
-        }
-
-        // Mute toggle
         document.getElementById('mute-toggle').addEventListener('click', function () {
             audioManager.toggleMute();
+            try { audioManager.playSound('click'); } catch (e) { }
         });
 
-        // Initialize
         window.addEventListener('load', function () {
-            audioManager.initBackgroundMusic('forest');
+            audioManager.initBackgroundMusic();
             audioManager.updateMuteButton();
-            updateUI();
+        });
+    </script>
+
+    <script type="module">
+        // Cloud Stats Logic (Module - Progressive Enhancement)
+        import { getUserStats } from './js/progress-service.js';
+        import { auth } from './js/firebase-config.js';
+        import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+        async function updateUI() {
+            try {
+                const stats = await getUserStats();
+                if (stats && stats.stats && stats.stats.totalScore !== undefined) {
+                    // Fixed access to .stats.totalScore
+                    document.getElementById('star-count').textContent = stats.stats.totalScore;
+                }
+            } catch (e) {
+                console.log("Stats error:", e);
+                const local = localStorage.getItem('totalStars');
+                if (local) document.getElementById('star-count').textContent = local;
+            }
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) updateUI();
         });
     </script>
 </body>

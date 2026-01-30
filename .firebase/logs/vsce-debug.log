@@ -1,0 +1,12 @@
+[debug] [2026-01-29T23:23:37.173Z] [Firebase Plugin] Activating Firebase extension.
+[info] [Firebase Plugin] Unable to check firebase-tools installation: TypeError: fetch failed
+[debug] [2026-01-29T23:23:50.074Z] [Firebase Plugin] requireAuthWrapper
+[debug] [2026-01-29T23:23:50.076Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[error] [Firebase Plugin] requireAuth error: Could not load the default credentials. Browse to https://cloud.google.com/docs/authentication/getting-started for more information.
+[debug] [2026-01-29T23:23:50.100Z] [Firebase Plugin] VSCode notification server listening on port 40001
+[info] [Firebase Plugin] Starting Data Connect toolkit (version 3.1.0) on port 50001
+[info] i  dataconnect: downloading dataconnect-emulator-3.1.0.exe... {"metadata":{"emulator":{"name":"dataconnect"},"message":"downloading dataconnect-emulator-3.1.0.exe..."}}
+[debug] [2026-01-29T23:23:50.436Z] >>> [apiv2][query] GET https://storage.googleapis.com/firemat-preview-drop/emulator/dataconnect-emulator-windows-amd64-v3.1.0 
+[debug] [2026-01-29T23:24:44.270Z] <<< [apiv2][status] GET https://storage.googleapis.com/firemat-preview-drop/emulator/dataconnect-emulator-windows-amd64-v3.1.0 200
+[debug] [2026-01-29T23:24:44.272Z] <<< [apiv2][body] GET https://storage.googleapis.com/firemat-preview-drop/emulator/dataconnect-emulator-windows-amd64-v3.1.0 [stream]
+[info] [Firebase Plugin] Stopping Data Connect toolkit

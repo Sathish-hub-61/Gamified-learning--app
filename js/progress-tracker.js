@@ -18,6 +18,14 @@ class ProgressTracker {
         this.saveProgress();
         this.animateStars(amount);
         this.checkBadgeUnlocks();
+
+        // Sync with Firebase if available
+        if (window.saveGameProgress && this.currentGameId) {
+            window.saveGameProgress(this.currentGameId, {
+                score: this.totalStars,
+                metadata: { lastStarGain: amount }
+            });
+        }
     }
 
     // Animate star gain
@@ -112,6 +120,14 @@ class ProgressTracker {
 
         document.body.appendChild(modal);
         setTimeout(() => modal.classList.add('show'), 100);
+
+        // Automatically remove badge after 5 seconds if not clicked
+        setTimeout(() => {
+            if (modal.parentNode) {
+                modal.classList.remove('show');
+                setTimeout(() => modal.remove(), 500);
+            }
+        }, 5000);
     }
 
     hasBadge(badgeId) {
@@ -120,6 +136,7 @@ class ProgressTracker {
 
     // Complete a game
     completeGame(gameId, score, accuracy) {
+        this.currentGameId = gameId;
         if (!this.completedGames.includes(gameId)) {
             this.completedGames.push(gameId);
         }
@@ -147,6 +164,24 @@ class ProgressTracker {
         localStorage.setItem('gameData', JSON.stringify(allGames));
         this.saveProgress();
         this.checkBadgeUnlocks();
+
+        // Sync with Firebase
+        if (window.saveGameProgress) {
+            window.saveGameProgress(gameId, {
+                score: score,
+                completed: true,
+                correctAnswers: Math.round((accuracy / 100) * 10), // Heuristic
+                attempts: 10
+            });
+        }
+
+        if (window.saveSession) {
+            window.saveSession({
+                duration: this.getSessionDuration(),
+                gamesPlayed: [gameId],
+                totalScore: score
+            });
+        }
     }
 
     getGameData() {
@@ -218,3 +253,7 @@ class ProgressTracker {
 
 // Export for use in other files
 window.ProgressTracker = ProgressTracker;
+window.saveProgress = () => {
+    const tracker = new ProgressTracker();
+    tracker.saveProgress();
+};

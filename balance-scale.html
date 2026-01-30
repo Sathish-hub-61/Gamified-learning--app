@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Balance the Scale - PlayLearn</title>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .game-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .game-header {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 80px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            text-align: center;
+        }
+
+        .game-title {
+            font-size: 32px;
+            color: #667eea;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .score-display {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+            font-size: 18px;
+        }
+
+        .score-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Scale Container */
+        .scale-container {
+            background: white;
+            border-radius: 25px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .scale-stand {
+            width: 20px;
+            height: 150px;
+            background: linear-gradient(135deg, #8B4513, #A0522D);
+            margin: 0 auto;
+            border-radius: 10px;
+            position: relative;
+        }
+
+        .scale-beam {
+            width: 600px;
+            height: 15px;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 10px;
+            transition: transform 0.5s ease;
+            transform-origin: center;
+        }
+
+        .scale-beam.tilt-left {
+            transform: translateX(-50%) rotate(-8deg);
+        }
+
+        .scale-beam.tilt-right {
+            transform: translateX(-50%) rotate(8deg);
+        }
+
+        .scale-beam.balanced {
+            transform: translateX(-50%) rotate(0deg);
+        }
+
+        .scale-pan {
+            width: 180px;
+            height: 120px;
+            background: linear-gradient(135deg, #E8E8E8, #C0C0C0);
+            border: 4px solid #999;
+            border-radius: 15px;
+            position: absolute;
+            top: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.5s ease;
+        }
+
+        .scale-pan.left {
+            left: 50px;
+        }
+
+        .scale-pan.right {
+            right: 50px;
+        }
+
+        .scale-pan.drop-zone {
+            min-height: 120px;
+        }
+
+        .scale-pan.drag-over {
+            background: linear-gradient(135deg, #D4F1F4, #A8E6CF);
+            border-color: #4CAF50;
+        }
+
+        .pan-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .pan-value {
+            font-size: 48px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .pan-numbers {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        /* Number Tiles */
+        .number-tiles {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 200px;
+            padding: 20px;
+        }
+
+        .number-tile {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            font-weight: 700;
+            cursor: grab;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .number-tile:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .number-tile.dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+        }
+
+        .number-tile.used {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .number-tile.in-pan {
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            margin: 3px;
+        }
+
+        /* Feedback */
+        .feedback {
+            text-align: center;
+            font-size: 24px;
+            font-weight: 700;
+            margin-top: 20px;
+            min-height: 40px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .feedback.show {
+            opacity: 1;
+        }
+
+        .feedback.success {
+            color: #4CAF50;
+        }
+
+        .feedback.error {
+            color: #FF6B6B;
+        }
+
+        /* Buttons */
+        .game-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Completion Modal */
+        .completion-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .completion-modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 30px;
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            animation: bounce-in 0.5s ease;
+        }
+
+        .modal-content h2 {
+            color: #667eea;
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        .stars {
+            font-size: 60px;
+            margin: 20px 0;
+        }
+
+        @keyframes bounce-in {
+            0% {
+                transform: scale(0.3);
+                opacity: 0;
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-10px);
+            }
+
+            75% {
+                transform: translateX(10px);
+            }
+        }
+
+        .shake {
+            animation: shake 0.5s ease;
+        }
+    </style>
+</head>
+
+<body>
+    <button class="back-button" onclick="window.location.href='game-hub-6-9.html'">← Back to Games</button>
+    <button id="mute-toggle" class="btn-mute"
+        style="position: fixed; bottom: 20px; right: 20px; font-size: 20px; background: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; box-shadow: var(--shadow-md); z-index: 1000;">🔊</button>
+
+    <div class="game-container">
+        <div class="game-header">
+            <div class="game-title">
+                <span>⚖️</span>
+                <span>Balance the Scale</span>
+            </div>
+            <div class="score-display">
+                <div class="score-item">
+                    <span>🎯 Score:</span>
+                    <span id="scoreValue">0</span>
+                </div>
+                <div class="score-item">
+                    <span>✅ Correct:</span>
+                    <span id="correctValue">0</span>
+                </div>
+                <div class="score-item">
+                    <span>❌ Attempts:</span>
+                    <span id="attemptsValue">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="scale-container">
+            <div class="scale-stand">
+                <div class="scale-beam balanced" id="scaleBeam">
+                    <div class="scale-pan left">
+                        <div class="pan-label">Left Side</div>
+                        <div class="pan-value" id="leftValue">5</div>
+                    </div>
+                    <div class="scale-pan right drop-zone" id="rightPan">
+                        <div class="pan-label">Drag Here</div>
+                        <div class="pan-numbers" id="rightNumbers"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="feedback" id="feedback"></div>
+        </div>
+
+        <div class="number-tiles" id="numberTiles">
+            <!-- Number tiles will be generated here -->
+        </div>
+
+        <div class="game-controls">
+            <button class="btn btn-warning" onclick="clearRight()">🔄 Clear</button>
+            <button class="btn btn-success" onclick="checkBalance()">✓ Check Balance</button>
+            <button class="btn btn-primary" onclick="nextProblem()">➡️ Next</button>
+        </div>
+    </div>
+
+    <div class="completion-modal" id="completionModal">
+        <div class="modal-content">
+            <h2>🎉 Amazing Work! 🎉</h2>
+            <div class="stars">⭐⭐⭐</div>
+            <p style="font-size: 20px; color: #666;">You're a balance master!</p>
+            <div style="margin: 20px 0;">
+                <div style="font-size: 24px; font-weight: 700; color: #667eea;" id="finalScore">Score: 0</div>
+                <div style="font-size: 18px; color: #666; margin-top: 10px;" id="finalCorrect">Correct: 0</div>
+            </div>
+            <div style="display: flex; gap: 15px; justify-content: center; margin-top: 30px;">
+                <button class="btn btn-primary" onclick="resetGame()">🔄 Play Again</button>
+                <button class="btn btn-secondary" onclick="window.location.href='game-hub-6-9.html'">🏠 Back to
+                    Hub</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/audio-manager.js"></script>
+    <script>
+        const GAME_ID = 'balance-scale';
+        const audioManager = new AudioManager();
+        audioManager.initBackgroundMusic();
+
+        document.getElementById('mute-toggle').addEventListener('click', () => {
+            audioManager.toggleMute();
+            audioManager.playSound('click');
+        });
+
+        let score = 0;
+        let correct = 0;
+        let attempts = 0;
+        let currentLeft = 5;
+        let currentRight = 0;
+        let wrongAttempts = 0;
+        let correctStreak = 0;
+        let difficulty = 'easy'; // easy, medium, hard
+        let draggedElement = null;
+        let usedTiles = [];
+
+        // Difficulty settings
+        const difficultySettings = {
+            easy: { target: [3, 5, 7], tiles: [1, 2, 3, 4], maxTiles: 4 },
+            medium: { target: [8, 10, 12], tiles: [1, 2, 3, 4, 5, 6], maxTiles: 6 },
+            hard: { target: [15, 18, 20], tiles: [2, 3, 4, 5, 6, 7, 8], maxTiles: 7 }
+        };
+
+        function initializeGame() {
+            generateProblem();
+            updateDisplay();
+        }
+
+        function generateProblem() {
+            const settings = difficultySettings[difficulty];
+
+            // Reduce options if wrong attempts
+            let availableTiles = [...settings.tiles];
+            if (wrongAttempts >= 2) {
+                availableTiles = availableTiles.slice(0, Math.max(3, settings.tiles.length - 2));
+            }
+
+            // Pick random target
+            currentLeft = settings.target[Math.floor(Math.random() * settings.target.length)];
+            currentRight = 0;
+            usedTiles = [];
+
+            // Update display
+            document.getElementById('leftValue').textContent = currentLeft;
+            document.getElementById('rightNumbers').innerHTML = '';
+
+            // Generate number tiles
+            const tilesContainer = document.getElementById('numberTiles');
+            tilesContainer.innerHTML = '';
+
+            availableTiles.forEach(num => {
+                const tile = document.createElement('div');
+                tile.className = 'number-tile';
+                tile.textContent = num;
+                tile.draggable = true;
+                tile.dataset.value = num;
+
+                tile.addEventListener('dragstart', handleDragStart);
+                tile.addEventListener('dragend', handleDragEnd);
+
+                tilesContainer.appendChild(tile);
+            });
+
+            // Setup drop zone
+            const rightPan = document.getElementById('rightPan');
+            rightPan.addEventListener('dragover', handleDragOver);
+            rightPan.addEventListener('dragleave', handleDragLeave);
+            rightPan.addEventListener('drop', handleDrop);
+
+            updateScale();
+        }
+
+        function handleDragStart(e) {
+            if (this.classList.contains('used')) return;
+            draggedElement = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            this.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            this.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            this.classList.remove('drag-over');
+
+            if (!draggedElement || draggedElement.classList.contains('used')) return;
+
+            const value = parseInt(draggedElement.dataset.value);
+
+            // Add to right pan
+            const numberTile = document.createElement('div');
+            numberTile.className = 'number-tile in-pan';
+            numberTile.textContent = value;
+            numberTile.dataset.value = value;
+
+            document.getElementById('rightNumbers').appendChild(numberTile);
+
+            // Mark original as used
+            draggedElement.classList.add('used');
+            usedTiles.push(draggedElement);
+
+            // Update total
+            currentRight += value;
+
+            updateScale();
+            audioManager.playSound('click');
+        }
+
+        function updateScale() {
+            const beam = document.getElementById('scaleBeam');
+            beam.classList.remove('balanced', 'tilt-left', 'tilt-right');
+
+            if (currentRight === 0) {
+                beam.classList.add('tilt-left');
+            } else if (currentRight === currentLeft) {
+                beam.classList.add('balanced');
+            } else if (currentRight < currentLeft) {
+                beam.classList.add('tilt-left');
+            } else {
+                beam.classList.add('tilt-right');
+            }
+        }
+
+        function clearRight() {
+            currentRight = 0;
+            document.getElementById('rightNumbers').innerHTML = '';
+
+            // Restore used tiles
+            usedTiles.forEach(tile => tile.classList.remove('used'));
+            usedTiles = [];
+
+            updateScale();
+            hideFeedback();
+        }
+
+        function checkBalance() {
+            attempts++;
+            updateDisplay();
+
+            const feedback = document.getElementById('feedback');
+
+            if (currentRight === currentLeft) {
+                // Correct!
+                score += 10;
+                correct++;
+                correctStreak++;
+                wrongAttempts = 0;
+
+                feedback.textContent = '🎉 Perfect Balance!';
+                feedback.className = 'feedback success show';
+                audioManager.playSound('correct');
+
+                // Celebrate
+                document.getElementById('scaleBeam').style.animation = 'bounce-in 0.5s ease';
+                setTimeout(() => {
+                    document.getElementById('scaleBeam').style.animation = '';
+                }, 500);
+
+                // Adjust difficulty
+                if (correctStreak >= 2) {
+                    if (difficulty === 'easy') difficulty = 'medium';
+                    else if (difficulty === 'medium') difficulty = 'hard';
+                    correctStreak = 0;
+                }
+
+                updateDisplay();
+
+                // Save progress
+                if (window.saveGameProgress) {
+                    window.saveGameProgress(GAME_ID, {
+                        score: score,
+                        completed: correct >= 10,
+                        attempts: attempts,
+                        correctAnswers: correct
+                    });
+                }
+
+                // Check if game complete
+                if (correct >= 10) {
+                    setTimeout(showCompletionModal, 1500);
+                }
+            } else if (currentRight < currentLeft) {
+                wrongAttempts++;
+                feedback.textContent = '⬇️ Too light! Add more.';
+                feedback.className = 'feedback error show';
+                audioManager.playSound('wrong');
+                document.getElementById('rightPan').classList.add('shake');
+                setTimeout(() => {
+                    document.getElementById('rightPan').classList.remove('shake');
+                }, 500);
+            } else {
+                wrongAttempts++;
+                feedback.textContent = '⬆️ Too heavy! Try again.';
+                feedback.className = 'feedback error show';
+                audioManager.playSound('wrong');
+                document.getElementById('rightPan').classList.add('shake');
+                setTimeout(() => {
+                    document.getElementById('rightPan').classList.remove('shake');
+                }, 500);
+            }
+        }
+
+        function hideFeedback() {
+            document.getElementById('feedback').classList.remove('show');
+        }
+
+        function nextProblem() {
+            hideFeedback();
+            generateProblem();
+        }
+
+        function updateDisplay() {
+            document.getElementById('scoreValue').textContent = score;
+            document.getElementById('correctValue').textContent = correct;
+            document.getElementById('attemptsValue').textContent = attempts;
+        }
+
+        async function showCompletionModal() {
+            document.getElementById('finalScore').textContent = `Score: ${score}`;
+            document.getElementById('finalCorrect').textContent = `Correct: ${correct} / ${attempts}`;
+            document.getElementById('completionModal').classList.add('active');
+
+            // Cloud Sync
+            if (window.saveGameProgress) {
+                await window.saveGameProgress('balance-scale', {
+                    score: score,
+                    completed: true,
+                    correctAnswers: correct,
+                    attempts: attempts
+                });
+            }
+
+            if (window.saveSession) {
+                await window.saveSession({
+                    duration: Math.floor((Date.now() - sessionStartTime) / 1000),
+                    gamesPlayed: ['balance-scale'],
+                    totalScore: score
+                });
+            }
+        }
+
+        function resetGame() {
+            score = 0;
+            correct = 0;
+            attempts = 0;
+            wrongAttempts = 0;
+            correctStreak = 0;
+            difficulty = 'easy';
+            document.getElementById('completionModal').classList.remove('active');
+            initializeGame();
+        }
+
+        window.resetGame = resetGame;
+        window.clearRight = clearRight;
+        window.checkBalance = checkBalance;
+        window.nextProblem = nextProblem;
+
+        // Initialize on load
+        initializeGame();
+    </script>
+    <script type="module" src="js/progress-service.js"></script>
+</body>
+
+</html>

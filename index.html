@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="A safe, adaptive, gamified learning platform that teaches children through play, not pressure.">
+    <meta name="description"
+        content="A safe, adaptive, gamified learning platform that teaches children through play, not pressure.">
     <title>PlayLearn - Fun Learning for Kids</title>
-    
+
     <!-- CSS -->
     <link rel="stylesheet" href="css/global.css">
-    
+
     <style>
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -115,6 +117,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="landing-container">
         <div class="mascot-container">
@@ -128,7 +131,7 @@
             <label class="checkbox-wrapper" for="parent-consent">
                 <input type="checkbox" id="parent-consent" aria-required="true">
                 <span class="checkbox-label">
-                    I am a parent/guardian and I agree to the 
+                    I am a parent/guardian and I agree to the
                     <span class="terms-link" onclick="showTerms()">Terms & Conditions</span>
                 </span>
             </label>
@@ -152,12 +155,12 @@
                 <p>• No personal data is permanently stored</p>
                 <p>• All progress is saved locally on your device</p>
                 <p>• No third-party tracking or advertising</p>
-                
+
                 <h3>Content</h3>
                 <p>• Age-appropriate educational content</p>
                 <p>• Parent-approved safety modules</p>
                 <p>• No external links or purchases</p>
-                
+
                 <h3>Usage</h3>
                 <p>• Designed for children ages 3-12</p>
                 <p>• Parental supervision recommended</p>
@@ -167,12 +170,25 @@
         </div>
     </div>
 
+    <button id="mute-toggle" class="btn-mute"
+        style="position: fixed; bottom: 20px; right: 20px; font-size: 24px; background: white; border: none; border-radius: 50%; width: 50px; height: 50px; cursor: pointer; box-shadow: var(--shadow-md); z-index: 1000;">🔊</button>
+
+    <script src="js/audio-manager.js"></script>
     <script>
         // Consent checkbox handling
         const consentCheckbox = document.getElementById('parent-consent');
         const startBtn = document.getElementById('start-btn');
+        const audioManager = new AudioManager();
 
-        consentCheckbox.addEventListener('change', function() {
+        // Initialize background music
+        audioManager.initBackgroundMusic();
+
+        // Mute toggle
+        document.getElementById('mute-toggle').addEventListener('click', () => {
+            audioManager.toggleMute();
+        });
+
+        consentCheckbox.addEventListener('change', function () {
             if (this.checked) {
                 startBtn.classList.remove('btn-disabled');
                 startBtn.disabled = false;
@@ -183,19 +199,23 @@
         });
 
         // Start button
-        startBtn.addEventListener('click', function() {
+        startBtn.addEventListener('click', function () {
             if (consentCheckbox.checked) {
+                audioManager.playSound('click');
                 // Save consent
                 localStorage.setItem('parentConsent', 'true');
                 localStorage.setItem('consentDate', new Date().toISOString());
-                
-                // Navigate to age selection
-                window.location.href = 'age-selection.html';
+
+                // Navigate to age selection after a small delay for sound
+                setTimeout(() => {
+                    window.location.href = 'age-selection.html';
+                }, 300);
             }
         });
 
         // Terms modal
         function showTerms() {
+            audioManager.playSound('click');
             document.getElementById('terms-modal').classList.add('active');
         }
 
@@ -204,14 +224,14 @@
         }
 
         // Close modal on overlay click
-        document.getElementById('terms-modal').addEventListener('click', function(e) {
+        document.getElementById('terms-modal').addEventListener('click', function (e) {
             if (e.target === this) {
                 closeTerms();
             }
         });
 
         // Check if already consented
-        window.addEventListener('load', function() {
+        window.addEventListener('load', function () {
             const hasConsent = localStorage.getItem('parentConsent');
             if (hasConsent === 'true') {
                 // Auto-redirect to age selection
@@ -220,4 +240,5 @@
         });
     </script>
 </body>
+
 </html>

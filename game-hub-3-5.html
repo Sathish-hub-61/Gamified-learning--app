@@ -21,9 +21,34 @@
             background: var(--white);
             border-radius: var(--radius-xl);
             padding: var(--spacing-xl);
-            margin-bottom: var(--spacing-lg);
+            margin: 20px var(--spacing-lg) var(--spacing-lg);
             box-shadow: var(--shadow-md);
             text-align: center;
+        }
+
+        .parents-portal-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--white);
+            color: var(--primary-purple);
+            padding: 10px 20px;
+            border-radius: 100px;
+            font-weight: 700;
+            text-decoration: none;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .parents-portal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            background: var(--primary-purple);
+            color: white;
         }
 
         .mascot-large {
@@ -46,21 +71,27 @@
 
         .games-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: var(--spacing-xl);
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
+            padding: 0 var(--spacing-lg) var(--spacing-2xl);
         }
 
         .game-card {
             background: var(--white);
-            border-radius: var(--radius-xl);
-            padding: var(--spacing-2xl);
+            border-radius: 20px;
+            padding: var(--spacing-xl);
             text-align: center;
             box-shadow: var(--shadow-lg);
             cursor: pointer;
             transition: all var(--transition-base);
             border: 4px solid transparent;
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
 
         .game-card:hover {
@@ -70,51 +101,97 @@
         }
 
         .game-icon {
-            font-size: 5rem;
+            font-size: 4rem;
             margin-bottom: var(--spacing-md);
             animation: pulse 2s ease-in-out infinite;
         }
 
         .game-title {
-            font-size: var(--font-size-2xl);
+            font-size: var(--font-size-xl);
             color: var(--neutral-dark);
             margin-bottom: var(--spacing-sm);
+            font-weight: 700;
         }
 
         .game-description {
-            font-size: var(--font-size-lg);
+            font-size: var(--font-size-base);
             color: var(--neutral-medium);
-            margin-bottom: var(--spacing-lg);
+            margin-bottom: var(--spacing-md);
         }
 
         .play-btn {
             width: 100%;
-            font-size: var(--font-size-xl);
-            padding: var(--spacing-lg);
+            font-size: var(--font-size-lg);
+            padding: var(--spacing-md) var(--spacing-lg);
+            border-radius: 12px;
         }
 
         .back-link {
             position: fixed;
-            top: var(--spacing-md);
-            left: var(--spacing-md);
-            background: var(--white);
-            padding: var(--spacing-sm) var(--spacing-md);
-            border-radius: var(--radius-full);
+            top: 20px;
+            left: 20px;
+            background: white;
+            padding: 12px 20px;
+            border-radius: 12px;
             text-decoration: none;
-            color: var(--neutral-dark);
-            font-weight: 600;
-            box-shadow: var(--shadow-md);
-            transition: all var(--transition-base);
+            color: #333;
+            font-weight: 700;
+            font-size: 18px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
+        .parent-link {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: #9370DB;
+            font-weight: 700;
+            font-size: 18px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .parent-link:hover,
         .back-link:hover {
-            transform: translateX(-5px);
-            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
         }
 
         @media (max-width: 768px) {
             .games-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, 1fr);
+                gap: var(--spacing-md);
+            }
+
+            .game-card {
+                padding: var(--spacing-md);
+            }
+
+            .game-icon {
+                font-size: 3rem;
+            }
+
+            .game-title {
+                font-size: var(--font-size-lg);
+            }
+
+            .game-description {
+                font-size: var(--font-size-sm);
             }
         }
     </style>
@@ -122,6 +199,9 @@
 
 <body>
     <a href="age-selection.html" class="back-link">← Back</a>
+    <a href="parent-dashboard-3-5.html" class="parents-portal-btn">
+        <span>👨‍👩‍👧‍👦</span> Parents Portal
+    </a>
 
     <div class="header fade-in">
         <img src="assets/images/mascot.png" alt="Mascot" class="mascot-large">
@@ -179,10 +259,18 @@
         </div>
     </div>
 
+    <button id="mute-toggle" class="btn-mute"
+        style="position: fixed; bottom: 20px; right: 20px; font-size: 24px; background: white; border: none; border-radius: 50%; width: 50px; height: 50px; cursor: pointer; box-shadow: var(--shadow-md); z-index: 1000;">🔊</button>
+
     <script src="js/audio-manager.js"></script>
     <script>
         const audioManager = new AudioManager();
-        audioManager.initBackgroundMusic('forest');
+        audioManager.initBackgroundMusic();
+
+        document.getElementById('mute-toggle').addEventListener('click', () => {
+            audioManager.toggleMute();
+            audioManager.playSound('click');
+        });
     </script>
 </body>
 

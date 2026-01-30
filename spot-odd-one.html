@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spot the Odd One - PlayLearn</title>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .game-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .game-header {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 80px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            text-align: center;
+        }
+
+        .game-title {
+            font-size: 32px;
+            color: #00d2ff;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .score-display {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+            font-size: 18px;
+        }
+
+        /* Items Container */
+        .items-container {
+            background: white;
+            border-radius: 25px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .question-title {
+            font-size: 24px;
+            color: #666;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            max-width: 600px;
+            margin: 0 auto 30px;
+        }
+
+        .item-card {
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            border: 4px solid #ddd;
+            border-radius: 20px;
+            padding: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .item-card:hover {
+            transform: scale(1.05);
+            border-color: #00d2ff;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .item-emoji {
+            font-size: 80px;
+            margin-bottom: 10px;
+        }
+
+        .item-label {
+            font-size: 18px;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .item-card.correct {
+            border-color: #4CAF50;
+            background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
+            animation: celebrate 0.6s ease;
+        }
+
+        .item-card.wrong {
+            border-color: #FF6B6B;
+            background: linear-gradient(135deg, #FFEBEE, #FFCDD2);
+            animation: shake 0.5s ease;
+        }
+
+        .item-card.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        /* Hint */
+        .hint-container {
+            background: #FFF9C4;
+            border: 2px solid #FBC02D;
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 16px;
+            color: #666;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .hint-container.show {
+            opacity: 1;
+        }
+
+        /* Feedback */
+        .feedback {
+            text-align: center;
+            font-size: 24px;
+            font-weight: 700;
+            margin-top: 20px;
+            min-height: 40px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .feedback.show {
+            opacity: 1;
+        }
+
+        .feedback.success {
+            color: #4CAF50;
+        }
+
+        .feedback.error {
+            color: #FF6B6B;
+        }
+
+        .reason {
+            font-size: 18px;
+            color: #666;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        /* Buttons */
+        .game-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: white;
+            color: #00d2ff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Completion Modal */
+        .completion-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .completion-modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 30px;
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            animation: bounce-in 0.5s ease;
+        }
+
+        @keyframes bounce-in {
+            0% {
+                transform: scale(0.3);
+                opacity: 0;
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-10px);
+            }
+
+            75% {
+                transform: translateX(10px);
+            }
+        }
+
+        @keyframes celebrate {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .items-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <button class="back-button" onclick="window.location.href='game-hub-6-9.html'">← Back to Games</button>
+    <button id="mute-toggle" class="btn-mute"
+        style="position: fixed; bottom: 20px; right: 20px; font-size: 20px; background: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; box-shadow: var(--shadow-md); z-index: 1000;">🔊</button>
+
+    <div class="game-container">
+        <div class="game-header">
+            <div class="game-title">
+                <span>🎯</span>
+                <span>Spot the Odd One</span>
+            </div>
+            <div class="score-display">
+                <div class="score-item">
+                    <span>🎯 Score:</span>
+                    <span id="scoreValue">0</span>
+                </div>
+                <div class="score-item">
+                    <span>✅ Correct:</span>
+                    <span id="correctValue">0</span>
+                </div>
+                <div class="score-item">
+                    <span>💡 Hints:</span>
+                    <span id="hintsValue">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="items-container">
+            <div class="question-title">Which one doesn't belong?</div>
+
+            <div class="items-grid" id="itemsGrid">
+                <!-- Items will be generated here -->
+            </div>
+
+            <div class="hint-container" id="hintContainer">
+                💡 Hint: <span id="hintText"></span>
+            </div>
+
+            <div class="feedback" id="feedback"></div>
+            <div class="reason" id="reason"></div>
+        </div>
+
+        <div class="game-controls">
+            <button class="btn btn-warning" onclick="showHint()">💡 Hint</button>
+            <button class="btn btn-primary" onclick="nextQuestion()">➡️ Next</button>
+        </div>
+    </div>
+
+    <div class="completion-modal" id="completionModal">
+        <div class="modal-content">
+            <h2>🎉 Classification Expert! 🎉</h2>
+            <div class="stars">⭐⭐⭐</div>
+            <p style="font-size: 20px; color: #666;">You found all the odd ones!</p>
+            <div style="margin: 20px 0;">
+                <div style="font-size: 24px; font-weight: 700; color: #00d2ff;" id="finalScore">Score: 0</div>
+                <div style="font-size: 18px; color: #666; margin-top: 10px;" id="finalCorrect">Correct: 0</div>
+            </div>
+            <div style="display: flex; gap: 15px; justify-content: center; margin-top: 30px;">
+                <button class="btn btn-primary" onclick="resetGame()">🔄 Play Again</button>
+                <button class="btn btn-secondary" onclick="window.location.href='game-hub-6-9.html'">🏠 Back to
+                    Hub</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="js/progress-service.js"></script>
+    <script src="js/audio-manager.js"></script>
+    <script>
+        const GAME_ID = 'spot-odd-one';
+        const audioManager = new AudioManager();
+        audioManager.initBackgroundMusic();
+
+        document.getElementById('mute-toggle').addEventListener('click', () => {
+            audioManager.toggleMute();
+            audioManager.playSound('click');
+        });
+
+        let score = 0;
+        let correct = 0;
+        let hintsUsed = 0;
+        let wrongAttempts = 0;
+        let currentQuestion = null;
+        let difficulty = 'easy'; // easy, medium, hard
+
+        // Question database
+        const questions = {
+            easy: [
+                {
+                    items: [
+                        { emoji: '🍎', label: 'Apple', category: 'fruit' },
+                        { emoji: '🍌', label: 'Banana', category: 'fruit' },
+                        { emoji: '🍇', label: 'Grapes', category: 'fruit' },
+                        { emoji: '🐶', label: 'Dog', category: 'animal' }
+                    ],
+                    oddOne: 3,
+                    reason: 'Dog is an animal, others are fruits',
+                    hint: 'Three are things you can eat'
+                },
+                {
+                    items: [
+                        { emoji: '🚗', label: 'Car', category: 'vehicle' },
+                        { emoji: '🚌', label: 'Bus', category: 'vehicle' },
+                        { emoji: '🍕', label: 'Pizza', category: 'food' },
+                        { emoji: '🚲', label: 'Bike', category: 'vehicle' }
+                    ],
+                    oddOne: 2,
+                    reason: 'Pizza is food, others are vehicles',
+                    hint: 'Three can take you places'
+                },
+                {
+                    items: [
+                        { emoji: '⚽', label: 'Ball', category: 'toy' },
+                        { emoji: '🧸', label: 'Teddy', category: 'toy' },
+                        { emoji: '🎮', label: 'Game', category: 'toy' },
+                        { emoji: '🌳', label: 'Tree', category: 'nature' }
+                    ],
+                    oddOne: 3,
+                    reason: 'Tree is nature, others are toys',
+                    hint: 'Three are things you play with'
+                },
+                {
+                    items: [
+                        { emoji: '🐱', label: 'Cat', category: 'animal' },
+                        { emoji: '🐭', label: 'Mouse', category: 'animal' },
+                        { emoji: '🐰', label: 'Rabbit', category: 'animal' },
+                        { emoji: '🪑', label: 'Chair', category: 'furniture' }
+                    ],
+                    oddOne: 3,
+                    reason: 'Chair is furniture, others are animals',
+                    hint: 'Three are living creatures'
+                }
+            ],
+            medium: [
+                {
+                    items: [
+                        { emoji: '🌞', label: 'Sun', category: 'hot' },
+                        { emoji: '🔥', label: 'Fire', category: 'hot' },
+                        { emoji: '❄️', label: 'Snow', category: 'cold' },
+                        { emoji: '☕', label: 'Coffee', category: 'hot' }
+                    ],
+                    oddOne: 2,
+                    reason: 'Snow is cold, others are hot',
+                    hint: 'Three make you warm'
+                },
+                {
+                    items: [
+                        { emoji: '📱', label: 'Phone', category: 'electronic' },
+                        { emoji: '💻', label: 'Laptop', category: 'electronic' },
+                        { emoji: '📺', label: 'TV', category: 'electronic' },
+                        { emoji: '📚', label: 'Book', category: 'non-electronic' }
+                    ],
+                    oddOne: 3,
+                    reason: 'Book doesn\'t need electricity',
+                    hint: 'Three need to be charged'
+                },
+                {
+                    items: [
+                        { emoji: '🦁', label: 'Lion', category: 'wild' },
+                        { emoji: '🐘', label: 'Elephant', category: 'wild' },
+                        { emoji: '🐄', label: 'Cow', category: 'farm' },
+                        { emoji: '🦒', label: 'Giraffe', category: 'wild' }
+                    ],
+                    oddOne: 2,
+                    reason: 'Cow is a farm animal, others are wild',
+                    hint: 'Three live in the jungle'
+                }
+            ],
+            hard: [
+                {
+                    items: [
+                        { emoji: '🎨', label: 'Art', category: 'creative' },
+                        { emoji: '🎵', label: 'Music', category: 'creative' },
+                        { emoji: '✏️', label: 'Writing', category: 'creative' },
+                        { emoji: '🔬', label: 'Science', category: 'analytical' }
+                    ],
+                    oddOne: 3,
+                    reason: 'Science is analytical, others are creative',
+                    hint: 'Three involve imagination'
+                },
+                {
+                    items: [
+                        { emoji: '🌊', label: 'Ocean', category: 'liquid' },
+                        { emoji: '💧', label: 'Water', category: 'liquid' },
+                        { emoji: '🏔️', label: 'Mountain', category: 'solid' },
+                        { emoji: '🌧️', label: 'Rain', category: 'liquid' }
+                    ],
+                    oddOne: 2,
+                    reason: 'Mountain is solid, others are liquid',
+                    hint: 'Three are forms of water'
+                }
+            ]
+        };
+
+        function initializeGame() {
+            generateQuestion();
+            updateDisplay();
+        }
+
+        function generateQuestion() {
+            let questionPool;
+
+            if (difficulty === 'easy') {
+                questionPool = questions.easy;
+            } else if (difficulty === 'medium') {
+                questionPool = questions.medium;
+            } else {
+                questionPool = questions.hard;
+            }
+
+            // Pick random question
+            currentQuestion = questionPool[Math.floor(Math.random() * questionPool.length)];
+
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            const grid = document.getElementById('itemsGrid');
+            grid.innerHTML = '';
+
+            currentQuestion.items.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'item-card';
+
+                const emoji = document.createElement('div');
+                emoji.className = 'item-emoji';
+                emoji.textContent = item.emoji;
+
+                const label = document.createElement('div');
+                label.className = 'item-label';
+                label.textContent = item.label;
+
+                card.appendChild(emoji);
+                card.appendChild(label);
+
+                card.onclick = () => checkAnswer(index, card);
+
+                grid.appendChild(card);
+            });
+
+            hideHint();
+            hideFeedback();
+        }
+
+        function checkAnswer(selected, cardElement) {
+            const feedback = document.getElementById('feedback');
+            const reason = document.getElementById('reason');
+            const allCards = document.querySelectorAll('.item-card');
+
+            // Disable all cards
+            allCards.forEach(card => card.classList.add('disabled'));
+
+            if (selected === currentQuestion.oddOne) {
+                // Correct!
+                score += 15;
+                correct++;
+                wrongAttempts = 0;
+
+                cardElement.classList.add('correct');
+                feedback.textContent = '🎉 Correct! You found it!';
+                feedback.className = 'feedback success show';
+                reason.textContent = currentQuestion.reason;
+                reason.style.color = '#4CAF50';
+                audioManager.playSound('correct');
+
+                // Adjust difficulty
+                if (correct % 2 === 0) {
+                    if (difficulty === 'easy') difficulty = 'medium';
+                    else if (difficulty === 'medium') difficulty = 'hard';
+                }
+
+                updateDisplay();
+
+                // Check completion
+                if (correct >= 10) {
+                    if (window.saveGameProgress) {
+                        window.saveGameProgress(GAME_ID, {
+                            score: score,
+                            completed: true,
+                            correctAnswers: correct,
+                            metadata: {
+                                hintsUsed: hintsUsed,
+                                difficulty: difficulty
+                            }
+                        });
+                    }
+                    setTimeout(showCompletionModal, 2000);
+                }
+            } else {
+                // Wrong
+                wrongAttempts++;
+
+                cardElement.classList.add('wrong');
+                feedback.textContent = '❌ Not quite! Try again.';
+                feedback.className = 'feedback error show';
+                audioManager.playSound('wrong');
+
+                // Show hint after 2 wrong attempts
+                if (wrongAttempts >= 2) {
+                    showHint();
+                    // Adjust difficulty
+                    if (difficulty === 'hard') difficulty = 'medium';
+                    else if (difficulty === 'medium') difficulty = 'easy';
+                }
+
+                setTimeout(() => {
+                    cardElement.classList.remove('wrong');
+                    allCards.forEach(card => card.classList.remove('disabled'));
+                    hideFeedback();
+                }, 1500);
+            }
+        }
+
+        function showHint() {
+            const hintContainer = document.getElementById('hintContainer');
+            const hintText = document.getElementById('hintText');
+
+            hintText.textContent = currentQuestion.hint;
+            hintContainer.classList.add('show');
+            hintsUsed++;
+            updateDisplay();
+        }
+
+        function hideHint() {
+            document.getElementById('hintContainer').classList.remove('show');
+        }
+
+        function hideFeedback() {
+            document.getElementById('feedback').classList.remove('show');
+            document.getElementById('reason').textContent = '';
+        }
+
+        function nextQuestion() {
+            generateQuestion();
+        }
+
+        function updateDisplay() {
+            document.getElementById('scoreValue').textContent = score;
+            document.getElementById('correctValue').textContent = correct;
+            document.getElementById('hintsValue').textContent = hintsUsed;
+        }
+
+        function showCompletionModal() {
+            document.getElementById('finalScore').textContent = `Score: ${score}`;
+            document.getElementById('finalCorrect').textContent = `Correct: ${correct}`;
+            document.getElementById('completionModal').classList.add('active');
+
+            if (window.saveGameProgress) {
+                window.saveGameProgress('spot-odd-one', {
+                    score: score,
+                    completed: true,
+                    correctAnswers: correct,
+                    attempts: correct + (score < correct * 10 ? 1 : 0) // Heuristic
+                });
+            }
+
+            if (window.saveSession) {
+                window.saveSession({
+                    duration: Math.floor((Date.now() - sessionStartTime) / 1000),
+                    gamesPlayed: ['spot-odd-one'],
+                    totalScore: score
+                });
+            }
+        }
+
+        function resetGame() {
+            score = 0;
+            correct = 0;
+            hintsUsed = 0;
+            wrongAttempts = 0;
+            difficulty = 'easy';
+            document.getElementById('completionModal').classList.remove('active');
+            initializeGame();
+        }
+
+        // Initialize on load
+        initializeGame();
+    </script>
+    <script type="module" src="js/progress-service.js"></script>
+</body>
+
+</html>

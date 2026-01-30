@@ -23,6 +23,7 @@
             background: white;
             border-radius: 20px;
             padding: 20px;
+            margin-top: 80px;
             margin-bottom: 30px;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
             display: flex;
@@ -146,8 +147,10 @@
 
         .drop-zones {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            max-height: 600px;
+            overflow-y: auto;
         }
 
         .drop-zone {
@@ -307,20 +310,53 @@
             left: 20px;
             background: white;
             border: none;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
+            border-radius: 12px;
+            padding: 12px 20px;
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 8px;
             cursor: pointer;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
             transition: all 0.3s;
-            z-index: 100;
+            z-index: 1000;
+            font-size: 16px;
+            font-weight: 700;
+            color: #333;
         }
 
         .back-button:hover {
-            transform: scale(1.1);
+            transform: translateY(-2px);
+            background: var(--primary-purple);
+            color: white;
+        }
+
+        .parents-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+            z-index: 1000;
+            font-size: 16px;
+            font-weight: 700;
+            color: #9370DB;
+            text-decoration: none;
+        }
+
+        .parents-button:hover {
+            transform: translateY(-2px);
+            background: #9370DB;
+            color: white;
         }
 
         @keyframes successPulse {
@@ -390,9 +426,14 @@
 </head>
 
 <body>
-    <button class="back-button" onclick="window.location.href='hub-3-5.html'">
+    <button class="back-button" onclick="window.location.href='game-hub-3-5.html'">
         ← Back
     </button>
+    <a href="parent-dashboard-3-5.html" class="parents-button">
+        👨‍👩‍👧 Parents
+    </a>
+    <button id="mute-toggle" class="btn-mute"
+        style="position: fixed; bottom: 20px; right: 20px; font-size: 20px; background: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; box-shadow: var(--shadow-md); z-index: 1000;">🔊</button>
 
     <div class="game-container">
         <div class="game-header">
@@ -406,7 +447,7 @@
                     <div class="score-label">Score</div>
                 </div>
                 <div class="score-item">
-                    <div class="score-value" id="matchedValue">0/6</div>
+                    <div class="score-value" id="matchedValue">0/10</div>
                     <div class="score-label">Matched</div>
                 </div>
             </div>
@@ -420,66 +461,14 @@
             <div class="draggable-section">
                 <div class="section-title">🔤 Letters</div>
                 <div class="letter-items" id="letterItems">
-                    <div class="letter-item" draggable="true" data-letter="A"
-                        style="background: linear-gradient(135deg, #ff6b6b, #ee5a6f);">
-                        A
-                    </div>
-                    <div class="letter-item" draggable="true" data-letter="B"
-                        style="background: linear-gradient(135deg, #4dabf7, #339af0);">
-                        B
-                    </div>
-                    <div class="letter-item" draggable="true" data-letter="C"
-                        style="background: linear-gradient(135deg, #51cf66, #37b24d);">
-                        C
-                    </div>
-                    <div class="letter-item" draggable="true" data-letter="D"
-                        style="background: linear-gradient(135deg, #ffd43b, #fab005);">
-                        D
-                    </div>
-                    <div class="letter-item" draggable="true" data-letter="E"
-                        style="background: linear-gradient(135deg, #ff922b, #fd7e14);">
-                        E
-                    </div>
-                    <div class="letter-item" draggable="true" data-letter="F"
-                        style="background: linear-gradient(135deg, #b197fc, #9775fa);">
-                        F
-                    </div>
+                    <!-- Letters will be dynamically generated and shuffled -->
                 </div>
             </div>
 
             <div class="draggable-section">
                 <div class="section-title">🎯 Match Here</div>
                 <div class="drop-zones" id="dropZones">
-                    <div class="drop-zone" data-letter="A">
-                        <div class="picture-emoji">🍎</div>
-                        <div class="picture-label">Apple</div>
-                        <div class="letter-hint">Starts with...</div>
-                    </div>
-                    <div class="drop-zone" data-letter="B">
-                        <div class="picture-emoji">🦋</div>
-                        <div class="picture-label">Butterfly</div>
-                        <div class="letter-hint">Starts with...</div>
-                    </div>
-                    <div class="drop-zone" data-letter="C">
-                        <div class="picture-emoji">🐱</div>
-                        <div class="picture-label">Cat</div>
-                        <div class="letter-hint">Starts with...</div>
-                    </div>
-                    <div class="drop-zone" data-letter="D">
-                        <div class="picture-emoji">🐶</div>
-                        <div class="picture-label">Dog</div>
-                        <div class="letter-hint">Starts with...</div>
-                    </div>
-                    <div class="drop-zone" data-letter="E">
-                        <div class="picture-emoji">🐘</div>
-                        <div class="picture-label">Elephant</div>
-                        <div class="letter-hint">Starts with...</div>
-                    </div>
-                    <div class="drop-zone" data-letter="F">
-                        <div class="picture-emoji">🐸</div>
-                        <div class="picture-label">Frog</div>
-                        <div class="letter-hint">Starts with...</div>
-                    </div>
+                    <!-- Drop zones will be dynamically generated and shuffled -->
                 </div>
             </div>
         </div>
@@ -502,32 +491,122 @@
             </div>
             <div class="modal-buttons">
                 <button class="btn btn-primary" onclick="resetGame()">🔄 Play Again</button>
-                <button class="btn btn-secondary" onclick="window.location.href='hub-3-5.html'">🏠 Back to Hub</button>
+                <button class="btn btn-secondary" onclick="window.location.href='game-hub-3-5.html'">🏠 Back to
+                    Hub</button>
             </div>
         </div>
     </div>
 
+    <script src="js/audio-manager.js"></script>
     <script>
+        const audioManager = new AudioManager();
+        audioManager.initBackgroundMusic();
+
+        document.getElementById('mute-toggle').addEventListener('click', () => {
+            audioManager.toggleMute();
+            audioManager.playSound('click');
+        });
+
+        const GAME_ID = 'drag-drop-alphabets';
+
         let score = 0;
         let matched = 0;
         let totalAttempts = 0;
         let draggedElement = null;
 
-        const letterItems = document.querySelectorAll('.letter-item');
         const dropZones = document.querySelectorAll('.drop-zone');
 
-        // Drag events for letter items
-        letterItems.forEach(item => {
-            item.addEventListener('dragstart', handleDragStart);
-            item.addEventListener('dragend', handleDragEnd);
-        });
+        // Letter data with gradients
+        const letters = [
+            { letter: 'A', gradient: 'linear-gradient(135deg, #ff6b6b, #ee5a6f)' },
+            { letter: 'B', gradient: 'linear-gradient(135deg, #4dabf7, #339af0)' },
+            { letter: 'C', gradient: 'linear-gradient(135deg, #51cf66, #37b24d)' },
+            { letter: 'D', gradient: 'linear-gradient(135deg, #ffd43b, #fab005)' },
+            { letter: 'E', gradient: 'linear-gradient(135deg, #ff922b, #fd7e14)' },
+            { letter: 'F', gradient: 'linear-gradient(135deg, #b197fc, #9775fa)' },
+            { letter: 'G', gradient: 'linear-gradient(135deg, #ff6ec7, #ff49db)' },
+            { letter: 'H', gradient: 'linear-gradient(135deg, #20c997, #12b886)' },
+            { letter: 'I', gradient: 'linear-gradient(135deg, #fd7e14, #ff922b)' },
+            { letter: 'J', gradient: 'linear-gradient(135deg, #9775fa, #b197fc)' }
+        ];
 
-        // Drop events for drop zones
-        dropZones.forEach(zone => {
-            zone.addEventListener('dragover', handleDragOver);
-            zone.addEventListener('dragleave', handleDragLeave);
-            zone.addEventListener('drop', handleDrop);
-        });
+        // Drop zone data with pictures
+        const dropZoneData = [
+            { letter: 'A', emoji: '🍎', label: 'Apple' },
+            { letter: 'B', emoji: '🦋', label: 'Butterfly' },
+            { letter: 'C', emoji: '🐱', label: 'Cat' },
+            { letter: 'D', emoji: '🐶', label: 'Dog' },
+            { letter: 'E', emoji: '🐘', label: 'Elephant' },
+            { letter: 'F', emoji: '🐸', label: 'Frog' },
+            { letter: 'G', emoji: '🦒', label: 'Giraffe' },
+            { letter: 'H', emoji: '🐴', label: 'Horse' },
+            { letter: 'I', emoji: '🍦', label: 'Ice Cream' },
+            { letter: 'J', emoji: '🪼', label: 'Jellyfish' }
+        ];
+
+        // Shuffle array function
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // Initialize game
+        function initializeGame() {
+            const letterItemsContainer = document.getElementById('letterItems');
+            const shuffledLetters = shuffleArray(letters);
+
+            // Generate letter items in random order
+            shuffledLetters.forEach(item => {
+                const letterItem = document.createElement('div');
+                letterItem.className = 'letter-item';
+                letterItem.draggable = true;
+                letterItem.setAttribute('data-letter', item.letter);
+                letterItem.style.background = item.gradient;
+                letterItem.textContent = item.letter;
+
+                // Add drag events
+                letterItem.addEventListener('dragstart', handleDragStart);
+                letterItem.addEventListener('dragend', handleDragEnd);
+
+                letterItemsContainer.appendChild(letterItem);
+            });
+
+            // Shuffle and generate drop zones
+            const dropZonesContainer = document.getElementById('dropZones');
+            const shuffledDropZones = shuffleArray(dropZoneData);
+            shuffledDropZones.forEach(zone => {
+                const dropZone = document.createElement('div');
+                dropZone.className = 'drop-zone';
+                dropZone.setAttribute('data-letter', zone.letter);
+
+                const pictureEmoji = document.createElement('div');
+                pictureEmoji.className = 'picture-emoji';
+                pictureEmoji.textContent = zone.emoji;
+
+                const pictureLabel = document.createElement('div');
+                pictureLabel.className = 'picture-label';
+                pictureLabel.textContent = zone.label;
+
+                const letterHint = document.createElement('div');
+                letterHint.className = 'letter-hint';
+                letterHint.textContent = 'Starts with...';
+
+                dropZone.appendChild(pictureEmoji);
+                dropZone.appendChild(pictureLabel);
+                dropZone.appendChild(letterHint);
+
+                // Add drop events
+                dropZone.addEventListener('dragover', handleDragOver);
+                dropZone.addEventListener('dragleave', handleDragLeave);
+                dropZone.addEventListener('drop', handleDrop);
+
+                dropZonesContainer.appendChild(dropZone);
+            });
+        }
 
         function handleDragStart(e) {
             if (this.classList.contains('matched')) return;
@@ -573,7 +652,7 @@
 
             if (draggedLetter === targetLetter) {
                 // Correct match
-                playSound('success');
+                audioManager.playSound('correct');
                 this.classList.add('correct');
                 draggedElement.classList.add('matched');
 
@@ -589,12 +668,21 @@
                 updateScore();
 
                 // Check if game is complete
-                if (matched === 6) {
+                if (matched === 10) {
                     setTimeout(showCompletionModal, 500);
+                }
+
+                if (window.saveGameProgress) {
+                    window.saveGameProgress(GAME_ID, {
+                        score: score,
+                        completed: matched === 10,
+                        attempts: totalAttempts,
+                        correctAnswers: matched
+                    });
                 }
             } else {
                 // Incorrect match
-                playSound('error');
+                audioManager.playSound('wrong');
                 this.classList.add('incorrect');
                 setTimeout(() => {
                     this.classList.remove('incorrect');
@@ -606,14 +694,14 @@
 
         function updateScore() {
             document.getElementById('scoreValue').textContent = score;
-            document.getElementById('matchedValue').textContent = `${matched}/6`;
+            document.getElementById('matchedValue').textContent = `${matched}/10`;
         }
 
         function showCompletionModal() {
             document.getElementById('finalScore').textContent = score;
             document.getElementById('finalAttempts').textContent = totalAttempts;
             document.getElementById('completionModal').classList.add('active');
-            playSound('complete');
+            audioManager.playSound('success');
 
             // Save progress
             saveProgress();
@@ -625,17 +713,57 @@
             totalAttempts = 0;
             updateScore();
 
-            // Reset all items
-            letterItems.forEach(item => {
-                item.classList.remove('matched');
+            // Clear and regenerate items
+            const letterItemsContainer = document.getElementById('letterItems');
+            letterItemsContainer.innerHTML = '';
+
+            // Reinitialize with shuffled letters
+            const shuffledLetters = shuffleArray(letters);
+            shuffledLetters.forEach(item => {
+                const letterItem = document.createElement('div');
+                letterItem.className = 'letter-item';
+                letterItem.draggable = true;
+                letterItem.setAttribute('data-letter', item.letter);
+                letterItem.style.background = item.gradient;
+                letterItem.textContent = item.letter;
+
+                letterItem.addEventListener('dragstart', handleDragStart);
+                letterItem.addEventListener('dragend', handleDragEnd);
+
+                letterItemsContainer.appendChild(letterItem);
             });
 
-            dropZones.forEach(zone => {
-                zone.classList.remove('correct', 'incorrect');
-                const droppedLetter = zone.querySelector('.dropped-letter');
-                if (droppedLetter) {
-                    droppedLetter.remove();
-                }
+            // Clear and regenerate drop zones in shuffled order
+            const dropZonesContainer = document.getElementById('dropZones');
+            dropZonesContainer.innerHTML = '';
+
+            const shuffledDropZones = shuffleArray(dropZoneData);
+            shuffledDropZones.forEach(zone => {
+                const dropZone = document.createElement('div');
+                dropZone.className = 'drop-zone';
+                dropZone.setAttribute('data-letter', zone.letter);
+
+                const pictureEmoji = document.createElement('div');
+                pictureEmoji.className = 'picture-emoji';
+                pictureEmoji.textContent = zone.emoji;
+
+                const pictureLabel = document.createElement('div');
+                pictureLabel.className = 'picture-label';
+                pictureLabel.textContent = zone.label;
+
+                const letterHint = document.createElement('div');
+                letterHint.className = 'letter-hint';
+                letterHint.textContent = 'Starts with...';
+
+                dropZone.appendChild(pictureEmoji);
+                dropZone.appendChild(pictureLabel);
+                dropZone.appendChild(letterHint);
+
+                dropZone.addEventListener('dragover', handleDragOver);
+                dropZone.addEventListener('dragleave', handleDragLeave);
+                dropZone.addEventListener('drop', handleDrop);
+
+                dropZonesContainer.appendChild(dropZone);
             });
 
             document.getElementById('completionModal').classList.remove('active');
@@ -676,24 +804,46 @@
             }
         }
 
-        function saveProgress() {
+        async function saveProgress() {
             const progress = {
-                game: 'alphabet-match',
+                game: 'drag-drop-alphabets',
                 score: score,
                 attempts: totalAttempts,
                 completed: true,
                 timestamp: new Date().toISOString()
             };
 
+            // Local storage backup
             let allProgress = JSON.parse(localStorage.getItem('gameProgress') || '[]');
             allProgress.push(progress);
             localStorage.setItem('gameProgress', JSON.stringify(allProgress));
 
-            let stats = JSON.parse(localStorage.getItem('userStats') || '{"stars": 0, "badges": 0}');
-            stats.stars += 3;
-            localStorage.setItem('userStats', JSON.stringify(stats));
+            // Cloud Sync
+            if (window.saveGameProgress) {
+                await window.saveGameProgress('drag-drop-alphabets', {
+                    score: score,
+                    completed: true,
+                    correctAnswers: score / 10, // Assuming 10 stars per letter
+                    attempts: totalAttempts
+                });
+            }
+
+            if (window.saveSession) {
+                await window.saveSession({
+                    duration: Math.floor((Date.now() - sessionStartTime) / 1000),
+                    gamesPlayed: ['drag-drop-alphabets'],
+                    totalScore: score
+                });
+            }
         }
+
+        window.resetGame = resetGame;
+        window.initializeGame = initializeGame;
+
+        // Initialize game on page load
+        initializeGame();
     </script>
+    <script type="module" src="js/progress-service.js"></script>
 </body>
 
 </html>

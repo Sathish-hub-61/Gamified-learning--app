@@ -23,6 +23,7 @@
             background: white;
             border-radius: 20px;
             padding: 20px;
+            margin-top: 80px;
             margin-bottom: 30px;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
             display: flex;
@@ -145,8 +146,10 @@
 
         .drop-zones {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            max-height: 600px;
+            overflow-y: auto;
         }
 
         .drop-zone {
@@ -303,20 +306,53 @@
             left: 20px;
             background: white;
             border: none;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
+            border-radius: 12px;
+            padding: 12px 20px;
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 8px;
             cursor: pointer;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
             transition: all 0.3s;
-            z-index: 100;
+            z-index: 1000;
+            font-size: 16px;
+            font-weight: 700;
+            color: #333;
         }
 
         .back-button:hover {
-            transform: scale(1.1);
+            transform: translateY(-2px);
+            background: #FF6B35;
+            color: white;
+        }
+
+        .parents-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+            z-index: 1000;
+            font-size: 16px;
+            font-weight: 700;
+            color: #9370DB;
+            text-decoration: none;
+        }
+
+        .parents-button:hover {
+            transform: translateY(-2px);
+            background: #9370DB;
+            color: white;
         }
 
         @keyframes successPulse {
@@ -386,9 +422,14 @@
 </head>
 
 <body>
-    <button class="back-button" onclick="window.location.href='hub-3-5.html'">
+    <button class="back-button" onclick="window.location.href='game-hub-3-5.html'">
         ← Back
     </button>
+    <a href="parent-dashboard-3-5.html" class="parents-button">
+        👨‍👩‍👧 Parents
+    </a>
+    <button id="mute-toggle" class="btn-mute"
+        style="position: fixed; bottom: 20px; right: 20px; font-size: 20px; background: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; box-shadow: var(--shadow-md); z-index: 1000;">🔊</button>
 
     <div class="game-container">
         <div class="game-header">
@@ -402,7 +443,7 @@
                     <div class="score-label">Score</div>
                 </div>
                 <div class="score-item">
-                    <div class="score-value" id="matchedValue">0/5</div>
+                    <div class="score-value" id="matchedValue">0/8</div>
                     <div class="score-label">Matched</div>
                 </div>
             </div>
@@ -416,52 +457,14 @@
             <div class="draggable-section">
                 <div class="section-title">🔢 Numbers</div>
                 <div class="number-items" id="numberItems">
-                    <div class="number-item" draggable="true" data-number="1"
-                        style="background: linear-gradient(135deg, #ff6b6b, #ee5a6f);">
-                        1
-                    </div>
-                    <div class="number-item" draggable="true" data-number="2"
-                        style="background: linear-gradient(135deg, #51cf66, #37b24d);">
-                        2
-                    </div>
-                    <div class="number-item" draggable="true" data-number="3"
-                        style="background: linear-gradient(135deg, #4dabf7, #339af0);">
-                        3
-                    </div>
-                    <div class="number-item" draggable="true" data-number="4"
-                        style="background: linear-gradient(135deg, #ffd43b, #fab005);">
-                        4
-                    </div>
-                    <div class="number-item" draggable="true" data-number="5"
-                        style="background: linear-gradient(135deg, #b197fc, #9775fa);">
-                        5
-                    </div>
+                    <!-- Numbers will be dynamically generated and shuffled -->
                 </div>
             </div>
 
             <div class="draggable-section">
                 <div class="section-title">🎯 Match Here</div>
                 <div class="drop-zones" id="dropZones">
-                    <div class="drop-zone" data-number="1">
-                        <div class="shadow-number">1</div>
-                        <div class="objects-display">🌟</div>
-                    </div>
-                    <div class="drop-zone" data-number="2">
-                        <div class="shadow-number">2</div>
-                        <div class="objects-display">🍎🍎</div>
-                    </div>
-                    <div class="drop-zone" data-number="3">
-                        <div class="shadow-number">3</div>
-                        <div class="objects-display">🦋🦋🦋</div>
-                    </div>
-                    <div class="drop-zone" data-number="4">
-                        <div class="shadow-number">4</div>
-                        <div class="objects-display">🌸🌸🌸🌸</div>
-                    </div>
-                    <div class="drop-zone" data-number="5">
-                        <div class="shadow-number">5</div>
-                        <div class="objects-display">⭐⭐⭐⭐⭐</div>
-                    </div>
+                    <!-- Drop zones will be dynamically generated and shuffled -->
                 </div>
             </div>
         </div>
@@ -484,12 +487,24 @@
             </div>
             <div class="modal-buttons">
                 <button class="btn btn-primary" onclick="resetGame()">🔄 Play Again</button>
-                <button class="btn btn-secondary" onclick="window.location.href='hub-3-5.html'">🏠 Back to Hub</button>
+                <button class="btn btn-secondary" onclick="window.location.href='game-hub-3-5.html'">🏠 Back to
+                    Hub</button>
             </div>
         </div>
     </div>
 
+    <script src="js/audio-manager.js"></script>
     <script>
+        const audioManager = new AudioManager();
+        audioManager.initBackgroundMusic();
+
+        document.getElementById('mute-toggle').addEventListener('click', () => {
+            audioManager.toggleMute();
+            audioManager.playSound('click');
+        });
+
+        const GAME_ID = 'drag-drop-counting';
+
         let score = 0;
         let matched = 0;
         let totalAttempts = 0;
@@ -498,18 +513,88 @@
         const numberItems = document.querySelectorAll('.number-item');
         const dropZones = document.querySelectorAll('.drop-zone');
 
-        // Drag events for number items
-        numberItems.forEach(item => {
-            item.addEventListener('dragstart', handleDragStart);
-            item.addEventListener('dragend', handleDragEnd);
-        });
+        // Number data with gradients
+        const numbers = [
+            { value: 1, gradient: 'linear-gradient(135deg, #ff6b6b, #ee5a6f)' },
+            { value: 2, gradient: 'linear-gradient(135deg, #51cf66, #37b24d)' },
+            { value: 3, gradient: 'linear-gradient(135deg, #4dabf7, #339af0)' },
+            { value: 4, gradient: 'linear-gradient(135deg, #ffd43b, #fab005)' },
+            { value: 5, gradient: 'linear-gradient(135deg, #b197fc, #9775fa)' },
+            { value: 6, gradient: 'linear-gradient(135deg, #ff922b, #fd7e14)' },
+            { value: 7, gradient: 'linear-gradient(135deg, #ff6ec7, #ff49db)' },
+            { value: 8, gradient: 'linear-gradient(135deg, #20c997, #12b886)' }
+        ];
 
-        // Drop events for drop zones
-        dropZones.forEach(zone => {
-            zone.addEventListener('dragover', handleDragOver);
-            zone.addEventListener('dragleave', handleDragLeave);
-            zone.addEventListener('drop', handleDrop);
-        });
+        // Drop zone data with objects
+        const dropZoneData = [
+            { number: 1, objects: '🌟' },
+            { number: 2, objects: '🍎🍎' },
+            { number: 3, objects: '🦋🦋🦋' },
+            { number: 4, objects: '🌸🌸🌸🌸' },
+            { number: 5, objects: '⭐⭐⭐⭐⭐' },
+            { number: 6, objects: '🍓🍓🍓🍓🍓🍓' },
+            { number: 7, objects: '🐝🐝🐝🐝🐝🐝🐝' },
+            { number: 8, objects: '🎈🎈🎈🎈🎈🎈🎈🎈' }
+        ];
+
+        // Shuffle array function
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // Initialize game
+        function initializeGame() {
+            const numberItemsContainer = document.getElementById('numberItems');
+            const shuffledNumbers = shuffleArray(numbers);
+
+            // Generate number items in random order
+            shuffledNumbers.forEach(num => {
+                const numberItem = document.createElement('div');
+                numberItem.className = 'number-item';
+                numberItem.draggable = true;
+                numberItem.setAttribute('data-number', num.value);
+                numberItem.style.background = num.gradient;
+                numberItem.textContent = num.value;
+
+                // Add drag events
+                numberItem.addEventListener('dragstart', handleDragStart);
+                numberItem.addEventListener('dragend', handleDragEnd);
+
+                numberItemsContainer.appendChild(numberItem);
+            });
+
+            // Shuffle and generate drop zones
+            const dropZonesContainer = document.getElementById('dropZones');
+            const shuffledDropZones = shuffleArray(dropZoneData);
+            shuffledDropZones.forEach(zone => {
+                const dropZone = document.createElement('div');
+                dropZone.className = 'drop-zone';
+                dropZone.setAttribute('data-number', zone.number);
+
+                const shadowNumber = document.createElement('div');
+                shadowNumber.className = 'shadow-number';
+                shadowNumber.textContent = zone.number;
+
+                const objectsDisplay = document.createElement('div');
+                objectsDisplay.className = 'objects-display';
+                objectsDisplay.textContent = zone.objects;
+
+                dropZone.appendChild(shadowNumber);
+                dropZone.appendChild(objectsDisplay);
+
+                // Add drop events
+                dropZone.addEventListener('dragover', handleDragOver);
+                dropZone.addEventListener('dragleave', handleDragLeave);
+                dropZone.addEventListener('drop', handleDrop);
+
+                dropZonesContainer.appendChild(dropZone);
+            });
+        }
 
         function handleDragStart(e) {
             if (this.classList.contains('matched')) return;
@@ -555,7 +640,7 @@
 
             if (draggedNumber === targetNumber) {
                 // Correct match
-                playSound('success');
+                audioManager.playSound('correct');
                 this.classList.add('correct');
                 draggedElement.classList.add('matched');
 
@@ -578,12 +663,21 @@
                 updateScore();
 
                 // Check if game is complete
-                if (matched === 5) {
+                if (matched === 8) {
                     setTimeout(showCompletionModal, 500);
+                }
+
+                if (window.saveGameProgress) {
+                    window.saveGameProgress(GAME_ID, {
+                        score: score,
+                        completed: matched === 8,
+                        attempts: totalAttempts,
+                        correctAnswers: matched
+                    });
                 }
             } else {
                 // Incorrect match
-                playSound('error');
+                audioManager.playSound('wrong');
                 this.classList.add('incorrect');
                 setTimeout(() => {
                     this.classList.remove('incorrect');
@@ -595,14 +689,14 @@
 
         function updateScore() {
             document.getElementById('scoreValue').textContent = score;
-            document.getElementById('matchedValue').textContent = `${matched}/5`;
+            document.getElementById('matchedValue').textContent = `${matched}/8`;
         }
 
         function showCompletionModal() {
             document.getElementById('finalScore').textContent = score;
             document.getElementById('finalAttempts').textContent = totalAttempts;
             document.getElementById('completionModal').classList.add('active');
-            playSound('complete');
+            audioManager.playSound('success');
 
             // Save progress
             saveProgress();
@@ -614,19 +708,52 @@
             totalAttempts = 0;
             updateScore();
 
-            // Reset all items
-            numberItems.forEach(item => {
-                item.classList.remove('matched');
+            // Clear and regenerate items
+            const numberItemsContainer = document.getElementById('numberItems');
+            numberItemsContainer.innerHTML = '';
+
+            // Reinitialize with shuffled numbers
+            const shuffledNumbers = shuffleArray(numbers);
+            shuffledNumbers.forEach(num => {
+                const numberItem = document.createElement('div');
+                numberItem.className = 'number-item';
+                numberItem.draggable = true;
+                numberItem.setAttribute('data-number', num.value);
+                numberItem.style.background = num.gradient;
+                numberItem.textContent = num.value;
+
+                numberItem.addEventListener('dragstart', handleDragStart);
+                numberItem.addEventListener('dragend', handleDragEnd);
+
+                numberItemsContainer.appendChild(numberItem);
             });
 
-            dropZones.forEach(zone => {
-                zone.classList.remove('correct', 'incorrect');
-                const shadowNumber = zone.querySelector('.shadow-number');
-                if (shadowNumber) shadowNumber.style.display = 'block';
-                const droppedNumber = zone.querySelector('.dropped-number');
-                if (droppedNumber) {
-                    droppedNumber.remove();
-                }
+            // Clear and regenerate drop zones in shuffled order
+            const dropZonesContainer = document.getElementById('dropZones');
+            dropZonesContainer.innerHTML = '';
+
+            const shuffledDropZones = shuffleArray(dropZoneData);
+            shuffledDropZones.forEach(zone => {
+                const dropZone = document.createElement('div');
+                dropZone.className = 'drop-zone';
+                dropZone.setAttribute('data-number', zone.number);
+
+                const shadowNumber = document.createElement('div');
+                shadowNumber.className = 'shadow-number';
+                shadowNumber.textContent = zone.number;
+
+                const objectsDisplay = document.createElement('div');
+                objectsDisplay.className = 'objects-display';
+                objectsDisplay.textContent = zone.objects;
+
+                dropZone.appendChild(shadowNumber);
+                dropZone.appendChild(objectsDisplay);
+
+                dropZone.addEventListener('dragover', handleDragOver);
+                dropZone.addEventListener('dragleave', handleDragLeave);
+                dropZone.addEventListener('drop', handleDrop);
+
+                dropZonesContainer.appendChild(dropZone);
             });
 
             document.getElementById('completionModal').classList.remove('active');
@@ -667,24 +794,46 @@
             }
         }
 
-        function saveProgress() {
+        async function saveProgress() {
             const progress = {
-                game: 'number-match',
+                game: 'drag-drop-counting',
                 score: score,
                 attempts: totalAttempts,
                 completed: true,
                 timestamp: new Date().toISOString()
             };
 
+            // Local storage backup
             let allProgress = JSON.parse(localStorage.getItem('gameProgress') || '[]');
             allProgress.push(progress);
             localStorage.setItem('gameProgress', JSON.stringify(allProgress));
 
-            let stats = JSON.parse(localStorage.getItem('userStats') || '{"stars": 0, "badges": 0}');
-            stats.stars += 3;
-            localStorage.setItem('userStats', JSON.stringify(stats));
+            // Cloud Sync
+            if (window.saveGameProgress) {
+                await window.saveGameProgress('drag-drop-counting', {
+                    score: score,
+                    completed: true,
+                    correctAnswers: score / 10,
+                    attempts: totalAttempts
+                });
+            }
+
+            if (window.saveSession) {
+                await window.saveSession({
+                    duration: Math.floor((Date.now() - sessionStartTime) / 1000),
+                    gamesPlayed: ['drag-drop-counting'],
+                    totalScore: score
+                });
+            }
         }
+
+        window.resetGame = resetGame;
+        window.initializeGame = initializeGame;
+
+        // Initialize game on page load
+        initializeGame();
     </script>
+    <script type="module" src="js/progress-service.js"></script>
 </body>
 
 </html>

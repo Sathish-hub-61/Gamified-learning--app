@@ -43,7 +43,7 @@
 
         .age-groups {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: var(--spacing-lg);
             margin-bottom: var(--spacing-xl);
         }
@@ -162,20 +162,35 @@
         </a>
     </div>
 
+    <button id="mute-toggle" class="btn-mute"
+        style="position: fixed; bottom: 20px; right: 20px; font-size: 24px; background: white; border: none; border-radius: 50%; width: 50px; height: 50px; cursor: pointer; box-shadow: var(--shadow-md); z-index: 1000;">🔊</button>
+
+    <script src="js/audio-manager.js"></script>
     <script>
+        const audioManager = new AudioManager();
+        audioManager.initBackgroundMusic();
+
+        document.getElementById('mute-toggle').addEventListener('click', () => {
+            audioManager.toggleMute();
+            audioManager.playSound('click');
+        });
+
         function selectAge(ageGroup) {
+            audioManager.playSound('click');
             // Save selected age group
             localStorage.setItem('selectedAgeGroup', ageGroup);
             localStorage.setItem('ageSelectedDate', new Date().toISOString());
 
-            // Navigate based on age group
-            if (ageGroup === '3-5') {
-                window.location.href = 'game-hub-3-5.html';
-            } else if (ageGroup === '6-9') {
-                window.location.href = 'game-hub-6-9.html';
-            } else if (ageGroup === '10-12') {
-                window.location.href = 'game-hub.html';
-            }
+            // Navigate based on age group after delay
+            setTimeout(() => {
+                if (ageGroup === '3-5') {
+                    window.location.href = 'game-hub-3-5.html';
+                } else if (ageGroup === '6-9') {
+                    window.location.href = 'game-hub-6-9.html';
+                } else if (ageGroup === '10-12') {
+                    window.location.href = 'game-hub.html';
+                }
+            }, 300);
         }
 
         // Check if consent was given

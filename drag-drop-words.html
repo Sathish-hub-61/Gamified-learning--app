@@ -397,6 +397,8 @@
     <button class="back-button" onclick="window.location.href='game-hub-6-9.html'">
         ← Back
     </button>
+    <button id="mute-toggle" class="btn-mute"
+        style="position: fixed; bottom: 20px; right: 20px; font-size: 20px; background: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; box-shadow: var(--shadow-md); z-index: 1000;">🔊</button>
 
     <div class="game-container">
         <div class="game-header">
@@ -460,7 +462,19 @@
         </div>
     </div>
 
+    <script src="js/firebase-config.js"></script>
+    <script src="js/progress-service.js"></script>
+    <script src="js/audio-manager.js"></script>
     <script>
+        const audioManager = new AudioManager();
+        audioManager.initBackgroundMusic();
+
+        document.getElementById('mute-toggle').addEventListener('click', () => {
+            audioManager.toggleMute();
+            audioManager.playSound('click');
+        });
+
+        const GAME_ID = 'drag-drop-words';
         const words = [
             { word: 'CAT', image: '🐱', hint: 'A furry pet that meows' },
             { word: 'DOG', image: '🐶', hint: 'A loyal pet that barks' },
@@ -598,13 +612,13 @@
             });
 
             if (userWord.length !== currentWord.length) {
-                playSound('error');
+                audioManager.playSound('wrong');
                 return;
             }
 
             if (userWord === currentWord) {
                 // Correct!
-                playSound('success');
+                audioManager.playSound('correct');
                 currentSlots.forEach(slot => {
                     slot.classList.add('correct');
                 });
@@ -621,7 +635,7 @@
                 }
             } else {
                 // Incorrect
-                playSound('error');
+                audioManager.playSound('wrong');
                 currentSlots.forEach(slot => {
                     if (slot.classList.contains('filled')) {
                         slot.style.animation = 'shake 0.5s';
@@ -650,7 +664,17 @@
         function showCompletionModal() {
             document.getElementById('finalScore').textContent = score;
             document.getElementById('completionModal').classList.add('active');
-            playSound('complete');
+            audioManager.playSound('success');
+            if (window.saveGameProgress) {
+                window.saveGameProgress(GAME_ID, {
+                    score: score,
+                    completed: true,
+                    correctAnswers: wordsCompleted,
+                    metadata: {
+                        totalWords: words.length
+                    }
+                });
+            }
             saveProgress();
         }
 
@@ -689,27 +713,43 @@
             }
         }
 
-        function saveProgress() {
+        async function saveProgress() {
             const progress = {
-                game: 'word-builder',
+                game: 'drag-drop-words',
                 score: score,
                 wordsCompleted: wordsCompleted,
                 completed: true,
                 timestamp: new Date().toISOString()
             };
 
+            // Local storage backup
             let allProgress = JSON.parse(localStorage.getItem('gameProgress') || '[]');
             allProgress.push(progress);
             localStorage.setItem('gameProgress', JSON.stringify(allProgress));
 
-            let stats = JSON.parse(localStorage.getItem('userStats') || '{"stars": 0, "badges": 0}');
-            stats.stars += 3;
-            localStorage.setItem('userStats', JSON.stringify(stats));
+            // Cloud Sync
+            if (window.saveGameProgress) {
+                await window.saveGameProgress('drag-drop-words', {
+                    score: score,
+                    completed: true,
+                    correctAnswers: wordsCompleted,
+                    attempts: wordsCompleted
+                });
+            }
+
+            if (window.saveSession) {
+                await window.saveSession({
+                    duration: Math.floor((Date.now() - sessionStartTime) / 1000),
+                    gamesPlayed: ['drag-drop-words'],
+                    totalScore: score
+                });
+            }
         }
 
         // Initialize first word on load
         initializeWord();
     </script>
+    <script type="module" src="js/progress-service.js"></script>
 </body>
 
 </html>

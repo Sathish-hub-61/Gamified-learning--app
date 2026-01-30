@@ -9,7 +9,7 @@
 class NLPEngine {
     constructor() {
         this.recognition = null;
-        this.isListening = false;
+        this.isListening = true;
         this.currentRhyme = null;
         this.participationDetected = false;
         this.confidenceThreshold = 0.3; // Very low threshold - we detect participation, not accuracy
